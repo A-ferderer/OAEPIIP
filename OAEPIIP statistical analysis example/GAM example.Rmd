@@ -24,14 +24,14 @@ str(data)
 
 Similar to before we will first fit a simple linear model and inspect a plot of this overlaid on the actual data
 ```{r, eval=TRUE, echo = FLASE}
-lm_mod = lm(concentration ~ Day, data = data)
+lm_mod = lm(Y ~ Day, data = data)
 termplot(lm_mod, partial.resid = TRUE, se = TRUE)
 ```
 
 No surprises here, our linear model does a poor job of explaining the relationship between x and y. Lets fit a simple gam model now
 
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod <- gam(concentration ~ s(Day), 
+gam_mod <- gam(Y ~ s(Day), 
                family = gaussian (), method = "REML", data = data)
 
 ```
@@ -58,7 +58,7 @@ Although it is much better than our linear model it is far from perfect. You wil
 
 Lets begin by adding Treatment, note we will had this as a "linear" or non smooth term because it is a factor variable
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod1 <- gam(concentration ~ s(Day) + Treatment, 
+gam_mod1 <- gam(Y ~ s(Day) + Treatment, 
                 family = gaussian (), method = "REML", data = data)
 
 plot(gam_mod1, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
@@ -70,7 +70,7 @@ This is an improvement on our previous model but there is still some data  which
 
 In the next model we will let the smooth function vary by each level of treatment but we will still keep Treatment as an additive variable as this allows the smoothers to vary by intercept for each level of Treatment.
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod2 <- gam(concentration ~ s(Day, by = Treatment) + Treatment, 
+gam_mod2 <- gam(Y ~ s(Day, by = Treatment) + Treatment, 
                 family = gaussian (), method = "REML", data = data)
 
 plot(gam_mod2, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
@@ -84,7 +84,7 @@ In order to help us visualise what is occurring when adding the random effects w
 In our first example we will fit microcosm as a random intercept, that is to say we will let the smooth of each microcosm vary by the point at which they intersept the y axis. You will see in the plot that the smooths for each microcosm are exatly the same except for the point at which they intercept the y axis.
 You will notice our plot produced with mgcViz isn't very helpful here but plots using itsadug are.
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod3 <- gam(concentration ~ s(Day) + s(Microcosm, bs = "re"),
+gam_mod3 <- gam(Y ~ s(Day) + s(Microcosm, bs = "re"),
                 family = gaussian (), method = "REML", data = data)
 
 plot(gam_mod3, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
@@ -93,50 +93,50 @@ plot(gam_mod3, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "li
 # Plot the summed effect of Day (without random effects)
 plot_smooth(gam_mod3, view = "Day", rm.ranef = TRUE, main = "intercept + s(Day)")
 # Plot each level of the random effect
-plot_smooth(gam_mod3, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Concentration")
+plot_smooth(gam_mod3, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
 Now we will let the slope of microcosm vary but we have a fixed intercept or start point
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod4 <- gam(concentration ~ s(Day) + s(Day,Microcosm, bs = "re"),
+gam_mod4 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "re"),
                 family = gaussian (), method = "REML", data = data)
 
-plot_smooth(gam_mod4, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Concentration")
+plot_smooth(gam_mod4, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
 Now we can let the intercept and slope vary. You'll notice there is almsot no difference between this plot and the plot for model4 as all microcosms started from the same source/body of water and therefore had the same y values to begin with
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod5 <- gam(concentration ~ s(Day) + s(Day,Microcosm, bs = "re")+ s(Day,Microcosm, bs = "re"),
+gam_mod5 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "re")+ s(Day,Microcosm, bs = "re"),
                 family = gaussian (), method = "REML", data = data)
 
-plot_smooth(gam_mod5, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Concentration")
+plot_smooth(gam_mod5, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
 Finally we will let each level of the random effect (microcosm) have its own smooth.
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod5 <- gam(concentration ~ s(Day) + s(Day,Microcosm, bs = "fs"),
+gam_mod5 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
 
-plot_smooth(gam_mod5, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Concentration")
+plot_smooth(gam_mod5, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
 We aren't actually interested in differences between microcosms though... we simply want to account for this in our models. Now that we have visualised the way different random effects influence the fit of our model we can re-run our final model and add in our treatments. If you compare the plot of this model to our first model you will notice we capture alot more of the variation here.
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod6 <- gam(concentration ~ s(Day, by = Treatment) + Treatment + s(Day,Microcosm, bs = "fs"),
+gam_mod6 <- gam(Y ~ s(Day, by = Treatment) + Treatment + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
-plot_smooth(gam_mod6, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Concentration")
+plot_smooth(gam_mod6, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
 Lets compare this to our actual data or averages for each treatment
 ```{r, eval=TRUE, echo = FLASE}
-avg_concentration <- aggregate(concentration ~ Treatment + Day, data = data, FUN = mean)
+avg_Y <- aggregate(Y ~ Treatment + Day, data = data, FUN = mean)
 
-ggplot(data = avg_concentration, aes(x = Day, y = concentration, color = Treatment)) +
+ggplot(data = avg_Y, aes(x = Day, y = Y, color = Treatment)) +
   geom_line() +
   geom_point() +
-  labs(title = "Average Concentration by Treatment",
+  labs(title = "Average Y by Treatment",
        x = "Day",
-       y = "Average Concentration")
+       y = "Average Y")
 ```
 
 It looks like our gam may be modelling some noise, see the control after day 5. Lets check our model and some of the assumptions of GAMs/GAMMS, we can do this using gam.check
@@ -148,7 +148,7 @@ Looking at the plots you'll notice a few things, our model struggles to fit assu
 In the text you'll see significant p values, in this space small p values indicate non-random distribution and suggests the model is not using enough basis functions. Basis functions are the functions which make up our smooth terms, to many and you will overfit the model and include noise, to little and you get a linear model.
 There are two things that can help with this the first is transforming your data to improve the fit and the second is specifying the number of basis functions or knots. In our case we should have as many knots as we have days/measurements. Knots are specified using "k=" in your smooth term for x
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod7 <- gam((concentration) ~ s(Day, by = Treatment, k =12) + Treatment + s(Day,Microcosm, bs = "fs"),
+gam_mod7 <- gam((Y) ~ s(Day, by = Treatment, k =12) + Treatment + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
 
 par(mfrow = c(2, 2))
@@ -187,31 +187,31 @@ In order to assess these we need to vary how the independent variable is entered
 4. gam_4 assumes the Treatment has a significant influence on the absolute value and timing of the dependent variable, thus we add treatment as an additive variable and let day vary by treatment
 
 ```{r, eval=TRUE, echo = FLASE}
-gam_1 <- gam((concentration) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs"),
+gam_1 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
 par(mfrow = c(1, 1))
 plot(gam_1, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
      pages = 1, all.terms = TRUE, seWithMean = TRUE)
-plot_smooth(gam_1, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Concentration")
+plot_smooth(gam_1, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
 # you will notice an error here saying that the two smooth terms are essentially repeating the same information or are highly correlated. this is okay as we know this is likely the case
 
-gam_2 <- gam((concentration) ~ s(Day, by = Treatment, k =12) + s(Day,Microcosm, bs = "fs"),
+gam_2 <- gam((Y) ~ s(Day, by = Treatment, k =12) + s(Day,Microcosm, bs = "fs"),
              family = gaussian (), method = "REML", data = data)
 plot(gam_2, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
      pages = 1, all.terms = TRUE, seWithMean = TRUE)
-plot_smooth(gam_2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Concentration")
+plot_smooth(gam_2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
 
-gam_3 <- gam((concentration) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs") + Treatment,
+gam_3 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs") + Treatment,
              family = gaussian (), method = "REML", data = data)
 plot(gam_3, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
      pages = 1, all.terms = TRUE, seWithMean = TRUE)
-plot_smooth(gam_3, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Concentration")
+plot_smooth(gam_3, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
 
-gam_4 <- gam((concentration) ~ s(Day,by =Treatment, k =12) + s(Day,Microcosm, bs = "fs") + Treatment,
+gam_4 <- gam((Y) ~ s(Day,by =Treatment, k =12) + s(Day,Microcosm, bs = "fs") + Treatment,
              family = gaussian (), method = "REML", data = data)
 plot(gam_4, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
      pages = 1, all.terms = TRUE, seWithMean = TRUE)
-plot_smooth(gam_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Concentration")
+plot_smooth(gam_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
 Now we can compare our models using AIC and R square values.
@@ -242,16 +242,16 @@ print(model_results)
 You will notice that gam_2 has the lowest AIC value but has the same R squared value as gam_4. Furthermore the difference in AIC values is < 2 which is a general threshold for determining significant differences between models. Thus you could safely pick either model 2 or 4 in this case, but first we should inspect the plots
 ```{r, eval=TRUE, echo = FLASE}
 par(mfrow = c(1, 1))
-plot_smooth(gam_2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Concentration")
-plot_smooth(gam_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Concentration")
-ggplot(data = avg_concentration, aes(x = Day, y = concentration, color = Treatment)) +
+plot_smooth(gam_2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
+plot_smooth(gam_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
+ggplot(data = avg_Y, aes(x = Day, y = Y, color = Treatment)) +
   geom_line() +
   geom_point() +
-  labs(title = "Average Concentration by Treatment",
+  labs(title = "Average Y by Treatment",
        x = "Day",
-       y = "Average Concentration")
+       y = "Average Y")
 ```
 
-There is an obvious limitation to our model comparison which becomes aparent when visualising the data. You will notice that gam_2 underestimates the difference in the slope of the relationship between concentration and Days, particularly for the equilibrated treatment. This data is an example of dissolved inorganic nutrient data thus we would expect there to be no difference in y (the amounts/concentrations) between treatments. When we comapre the start and end values given for "y" this is true. However our model comparison shows that although this is true gam_4 provides a better fit to the actual data. This is because in gam_2 the exclusion of treatment as an additive effect forces the treatments to have identical absolute values over the experimental treatment which alters the fit of the smoother, in particular the start and end value, contorting our data. Therefore under this scenario we should go with gam_4. It is important to note that this is not always the case e.g. Chla can vary by absolute values between treatments as to can abundance etc. However if you have a good understanding of the parameter and follow this tutorial you should be able to appropriately select the best model and infer significance from this and visual inspection of the model.
+There is an obvious limitation to our model comparison which becomes aparent when visualising the data. You will notice that gam_2 underestimates the difference in the slope of the relationship between Y and Days, particularly for the equilibrated treatment. This data is an example of dissolved inorganic nutrient data thus we would expect there to be no difference in y (the amounts/concentrations) between treatments. When we comapre the start and end values given for "y" this is true. However our model comparison shows that although this is true gam_4 provides a better fit to the actual data. This is because in gam_2 the exclusion of treatment as an additive effect forces the treatments to have identical absolute values over the experimental treatment which alters the fit of the smoother, in particular the start and end value, contorting our data. Therefore under this scenario we should go with gam_4. It is important to note that this is not always the case e.g. Chla can vary by absolute values between treatments as to can abundance etc. However if you have a good understanding of the parameter and follow this tutorial you should be able to appropriately select the best model and infer significance from this and visual inspection of the model.
 
 
