@@ -1,0 +1,57 @@
+GAM example
+
+Now that we understand why GAMs are such a useful tool in our statistical toolbelt lets have a look at a more relevant dataset.
+First we need to load the mgcv package.
+
+```{r, eval=TRUE,echo = FALSE}
+library(mgcv)
+```
+If you haven't already you will also need to download the csv file from the repository "GAM_example.csv".
+Now you can import this dataset and inspect the data
+
+```{r, eval=TRUE, echo = FLASE}
+data = read.csv("GAM_example.csv",fileEncoding = "UTF-8-BOM")
+head(data)
+str(data)
+```
+You will notice that microcosm and treatment are specified as character variables in our dataset. The mgcv package does not recognise character variables and thus we must change these to factor variables.
+
+```{r, eval=TRUE, echo = FLASE}
+data$Microcosm = as.factor(data$Microcosm)
+data$Treatment = as.factor(data$Treatment)
+str(data)
+```
+
+Similar to before we will first fit a simple linear model and inspect a plot of this overlaid on the actual data
+```{r, eval=TRUE, echo = FLASE}
+lm_mod = lm(concentration ~ Day, data = data)
+termplot(lm_mod, partial.resid = TRUE, se = TRUE)
+```
+
+No surprises here, our linear model does a poor job of explaining the relationship between x and y. Lets fit a simple gam model now
+
+```{r, eval=TRUE, echo = FLASE}
+gam_mod <- gam(concentration ~ s(Day), 
+               family = gaussian (), method = "REML", data = data)
+
+```
+This is the same as the linear model but Day is fit as a smooth term. 
+You will notice I have added a few extra pieces of imformation to our model which weren't included in the introduction.
+First "family = gaussian" as we are assuming this data fits a normal distribution, however there are several other families which may be used depending on your data (e.g. count, bionomial, non-normal distribution) 
+The second is "method = "REML"," this involves the selection of the best fit smoothing parameter and you can read more about this here (S. N. Wood 2006), however for the purpose of running simple GAMs and our tutorial here we will use REML.
+
+Now lets have a look at the plot. there are many ways to do this first a simple plot using R's default graphics package, the mgcViz package and itsadug package.
+It is very importat to visualise GAMs as we will find out later, so it is good to understand the different ways to plot your results
+```{r, eval=TRUE, echo = FLASE}
+plot(gam_mod, residuals = TRUE, pch = 1)
+
+library(mgcViz)
+plot(gam_mod, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
+     pages = 2, all.terms = TRUE, seWithMean = TRUE)
+```
+Although it is much better than our linear model it is far from perfect
+
+```{r, eval=TRUE, echo = FLASE}
+
+
+
