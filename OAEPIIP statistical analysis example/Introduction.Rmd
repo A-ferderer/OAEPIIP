@@ -26,18 +26,18 @@ You will notice that our linear model is doing a poor job of fitting our actual 
 
 To fit a GAM we first need to load the mgcv package
 
-```
+```{r, eval=TRUE,echo = FALSE}
 library(mgcv)
 ```
 Now we can fit our model following the same simple inputs used for our linear model above.
 
-```
+```{r, eval=TRUE,echo = FALSE}
 gam_mod <- gam(accel ~ s(times), data = mcycle)
 ```
 This is the same as a model above with the exception that accel has now been fitted as a smooth function of the covariate "times". It is this smooth function which enables us to model non-linear relationships between two variables. For a more in depth explanation see XXX.
 
 A simple plot for visualising our model can be obtained using:
-```
+```{r, eval=TRUE,echo = FALSE}
 plot(gam_mod, residuals = TRUE, pch = 1)
 ```
 In this plot you will see that we now have a non-linear relatioship and you can see from the plot that this model does a much better job of explaining raw our data.
