@@ -6,9 +6,11 @@ First it is important to understand why phytoplankton time series data is unique
 
 Because much of our data does not fit this assumption we must utilise other methods to appropriately assess our results. One such method involves the use of Generalised Additive Models or GAMs. Briefly, GAMs are a specific form of model whith the ability to incorporate non-linear distributions.
 
-To better understand this we can use the "mcycle" dataset available in the "VarReg" package
+To better understand this we can use the "mcycle" dataset available in the "VarReg" package. First we will need to load the "VarReg" and inspect the dataset "mcycle"
 
 ```{r, eval=TRUE,echo = FALSE}
-library(ggplot2, quietly = TRUE)
-library(mgcv, quietly = TRUE)
+library(VarReg)
+head(mcycle)
+str(mcycle)
+plot(mcycle)
 ```
