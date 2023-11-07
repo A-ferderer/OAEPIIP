@@ -7,7 +7,7 @@ First we need to load the mgcv package.
 library(mgcv)
 ```
 If you haven't already you will also need to download the csv file from the repository "GAM_example.csv".
-Now you can import this dataset and inspect the data
+Now you can import this dataset and inspect the data 
 
 ```{r, eval=TRUE, echo = FLASE}
 data = read.csv("GAM_example.csv",fileEncoding = "UTF-8-BOM")
@@ -48,6 +48,9 @@ plot(gam_mod, residuals = TRUE, pch = 1)
 library(mgcViz)
 plot(gam_mod, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
      pages = 2, all.terms = TRUE, seWithMean = TRUE)
+
+library(itsadug)
+plot_smooth(gam_mod, view = "Day", rm.ranef = TRUE, main = "intercept + s(Day)")
 ```
 Although it is much better than our linear model it is far from perfect
 
