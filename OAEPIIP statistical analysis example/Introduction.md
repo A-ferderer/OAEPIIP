@@ -1,4 +1,4 @@
-# OAEPIIP statistical analysis example
+Introduction
 
 First it is important to understand why phytoplankton time series data is unique and the difficulties associated with the appropriate analysis of such datasets. It is uncommon for phytoplankton associated time series data e.g. nutrient concentrations over time, to follow linear relationships. This prevents the analysis of such data using linear methods such as the linear regression as it violates one of the four major assumptions of linear models:
  
