@@ -97,17 +97,17 @@ We must also check for concurvity. This checks to see if one of our smooth terms
 concurvity(gam_mod3, full = FALSE)
 ```
 
-Ideally we want values less than 0.8. 
+This produces a large table in the console. When looking at this table you whould look at the "worst" table and ensure that all values are less
 
 Finally we can have a look at the model summary now
 ```{r, eval=TRUE, echo = FLASE}
 summary(gam_mod3)
 ```
 
-There is a lot to look at here but essentially the parametric coefficients explain our linear terms, in our case the additive term Treatment. But the Approximate significance of smooth terms is what we are really interested. edf is the effective degrees of freedom with 1 = straight line and the higher the number the more wiggly the smooth function is ref.df and f are test statistics used in anova but these are only approximate and it is best to check visually for significance. Finally our p value is showing statistical significance of each term, however this is approximate only and it is recomended to a) visually check this and b) compare several models via AIC values to establish the significance of variables
+There is a lot to look at here but essentially the parametric coefficients explain our linear terms, in our case the additive term Treatment. But the Approximate significance of smooth terms is what we are interested in. "edf" is the effective degrees of freedom with 1 = a straight line and the higher the number the more wiggly the smooth function is. "ref.df" and "f" are test statistics used in anova but these are only approximate. Finally our p value is showing statistical significance of each term, however this is approximate only and it is recomended to a) visually check this and b) compare several models via AIC values to establish the significance of variables (which we will do next).
 
 
-There are four main scenarios we would like to assess with our significance testing
+There are four potential scenarios we would like to assess with our significance testing
 1. The treatment has no significant effect on the dependent variable
 2. The Treatment significantly effects the time at which changes in the dependent variable occur
 3. The treatment has an effect on the absolute values of the dependent variable
@@ -117,15 +117,15 @@ There are four main scenarios we would like to assess with our significance test
 
 adapted from Ferderer et al. (2022) (https://doi.org/10.5194/bg-19-5375-2022)
 
-In order to assess these we need to vary how the independent variable is entered into our model this was discussed above but we will go through it again here;
+In order to assess these we need to vary how the independent variable is entered into our model, shown below;
 
-1. gam_1 assumes Treatment is not significant and therefore we don't need to include it in the model
+1. gam_1 assumes Treatment is not significant and therefore we don't need to include it in the model (this is the same as gam_mod1 with the addition of "k=12")
 2. gam_2 assumes the Treatment has a significant influence on the timing of the dependent variable, thus we let Day vary by Treatment
 3. gam_3 assumes the Treatment has a significant influence on the absolute value of the dependent variable, thus we add treatment as an additive variable
 4. gam_4 assumes the Treatment has a significant influence on the absolute value and timing of the dependent variable, thus we add treatment as an additive variable and let day vary by treatment
 
 ```{r, eval=TRUE, echo = FLASE}
-gam_1 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs"),
+gam_mod1 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
 par(mfrow = c(1, 1))
 plot(gam_1, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
