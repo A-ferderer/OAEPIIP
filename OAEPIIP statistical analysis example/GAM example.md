@@ -56,47 +56,18 @@ plot_smooth(gam_mod, view = "Day", main = "intercept + s(Day)")
 You will also notice all the plots look relatively similar but as our model gets more complex you will undertsand why we use various plotting packages.
 Although this model shows a better fit when comapred to the previous linear model, there are two issues that we need to adress before this model is applicable to the data collected during OAEPIIP. The first is the  accounting for temporal pseudoreplication caused by repeated measurements from each microcosm.
 
-To account for temporal pseudo replication we will add "Microcosm" as a random effect. For those with experience in linear mixed effects models you will know that there are several types of random effects random intercepts, random slopes and in gams random smooths as well. Here we go through the 4 ways to fit random effects but it is most likely that you will need to use the final method shown in "gam_mod4". Note when we add a random variable to a GAM it is called a Generalised Additive Mixed Model or GAMM.
+To account for temporal pseudo replication we will add "Microcosm" as a random effect. For those with experience in linear mixed effects models you will know that there are several types of random effects random intercepts, random slopes and in gams random smooths as well. Here we will fit Microcosm so that each level of the random effect (or each microcosm) will have its own smooth. If you want to see other ways a random effect can be fitted see the "Random effetcs.md"
 
-```{r, eval=TRUE, echo = FLASE}
-gam_mod1 <- gam(Y ~ s(Day) + s(Microcosm, bs = "re"),
-                family = gaussian (), method = "REML", data = data)
+Note when we add a random variable to a GAM it is called a Generalised Additive Mixed Model or GAMM.
 
-plot(gam_mod1, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
-     pages = 1, all.terms = TRUE, seWithMean = TRUE)
-
-# Plot the summed effect of Day (without random effects)
-plot_smooth(gam_mod1, view = "Day", rm.ranef = TRUE, main = "intercept + s(Day)")
-# Plot each level of the random effect
-plot_smooth(gam_mod1, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
-```
-
-Now we will let the slope of microcosm vary but we have a fixed intercept or start point
-```{r, eval=TRUE, echo = FLASE}
-gam_mod2 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "re"),
-                family = gaussian (), method = "REML", data = data)
-
-plot_smooth(gam_mod2, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
-```
-
-Now we can let the intercept and slope vary. You'll notice there is almsot no difference between this plot and the plot for model4 as all microcosms started from the same source/body of water and therefore had the same y values to begin with
-```{r, eval=TRUE, echo = FLASE}
-gam_mod3 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "re")+ s(Day,Microcosm, bs = "re"),
-                family = gaussian (), method = "REML", data = data)
-
-plot_smooth(gam_mod3, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
-```
-
-Finally we will let each level of the random effect (microcosm) have its own smooth.
 ```{r, eval=TRUE, echo = FLASE}
 gam_mod4 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
 
 plot_smooth(gam_mod4, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
+Now that we have accounted for the temporal pseudoreplication we can add our "Treatment". There are several ways to add Treatment to the model (which we will explore later) but for now we will add it so that it accounts for the most variability possible.
 
-
-Now that we have accounted for the temporal pseudoreplication we can add "Treatment" to our model.
 You will notice "Treatment" appears twice in the model. The first instance "s(Day, by = Treatment)" allows the smooth function to vary by each level of "Treatment". The second instance "+ Treatment" is specifying Treatment as an additive variable and allows the smoothers to vary by intercept for each level of Treatment.
 ```{r, eval=TRUE, echo = FLASE}
 gam_mod5 <- gam(Y ~ s(Day, by = Treatment) + Treatment + s(Day,Microcosm, bs = "fs"),
@@ -104,7 +75,7 @@ gam_mod5 <- gam(Y ~ s(Day, by = Treatment) + Treatment + s(Day,Microcosm, bs = "
 plot_smooth(gam_mod5, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
-Lets compare this to our actual data or averages for each treatment
+Now we need to explore our model fit. First we can compare our model to our actual data or averages for each treatment
 ```{r, eval=TRUE, echo = FLASE}
 avg_Y <- aggregate(Y ~ Treatment + Day, data = data, FUN = mean)
 
@@ -122,7 +93,7 @@ par(mfrow = c(2, 2))
 gam.check(gam_mod6)
 ```
 Looking at the plots you'll notice a few things, our model struggles to fit assumptions of gaussian data, mainly a normal dsitribution (top right plot).
-In the text you'll see significant p values, in this space small p values indicate non-random distribution and suggests the model is not using enough basis functions. Basis functions are the functions which make up our smooth terms, to many and you will overfit the model and include noise, to little and you get a linear model.
+In the text you'll see significant p values, in this space small p values indicate non-random distribution and suggests the model is not using enough basis functions. Basis functions are the functions which make up our smooth terms, to many results in "overfitting", while too little results in important data being excluded.
 There are two things that can help with this the first is transforming your data to improve the fit and the second is specifying the number of basis functions or knots. In our case we should have as many knots as we have days/measurements. Knots are specified using "k=" in your smooth term for x
 ```{r, eval=TRUE, echo = FLASE}
 gam_mod6 <- gam((Y) ~ s(Day, by = Treatment, k =12) + Treatment + s(Day,Microcosm, bs = "fs"),
@@ -151,10 +122,13 @@ There is a lot to look at here but essentially the parametric coefficients expla
 
 
 There are four main scenarios we would like to assess with our significance testing
-1. the treatment had no significant effect on the dependent variable
-2. the treatment had an effect on the timing of changes to the dependent variable
-3. the treatment had an effect on the absolute values of the dependent variable
-4. the treatment had an effect on the timing and absolute values of the dependent variable.
+1. The treatment has no significant effect on the dependent variable
+2. The Treatment significantly effects the time at which changes in the dependent variable occur
+3. The treatment has an effect on the absolute values of the dependent variable
+4. The treatment has a significant effect on the timing and absolute values of the dependent variable 
+
+![OAEPIIP_example](https://github.com/OAEPIIP/OAEPIIP-Statistics-example/assets/113956826/2b85b854-e4f1-4339-a1a0-fa69fe1fd635)
+adapted from Ferderer et al. (2022)
 
 In order to assess these we need to vary how the independent variable is entered into our model this was discussed above but we will go through it again here;
 
@@ -229,6 +203,6 @@ ggplot(data = avg_Y, aes(x = Day, y = Y, color = Treatment)) +
        y = "Average Y")
 ```
 
-There is an obvious limitation to our model comparison which becomes aparent when visualising the data. You will notice that gam_2 underestimates the difference in the slope of the relationship between Y and Days, particularly for the equilibrated treatment. This data is an example of dissolved inorganic nutrient data thus we would expect there to be no difference in y (the amounts/concentrations) between treatments. When we comapre the start and end values given for "y" this is true. However our model comparison shows that although this is true gam_4 provides a better fit to the actual data. This is because in gam_2 the exclusion of treatment as an additive effect forces the treatments to have identical absolute values over the experimental treatment which alters the fit of the smoother, in particular the start and end value, contorting our data. Therefore under this scenario we should go with gam_4. It is important to note that this is not always the case e.g. Chla can vary by absolute values between treatments as to can abundance etc. However if you have a good understanding of the parameter and follow this tutorial you should be able to appropriately select the best model and infer significance from this and visual inspection of the model.
+There is a limitation to our model comparison which becomes aparent when visualising the data. You will notice that gam_2 underestimates the difference in the slope of the relationship between Y and Days, particularly for the equilibrated treatment. This data is an example of dissolved inorganic nutrient data thus we would expect there to be no difference in y (the amounts/concentrations) between treatments. When we comapre the start and end values given for "y" this is true. However our model comparison shows that although this is true gam_4 provides a better fit to the actual data. This is because in gam_2 the exclusion of treatment as an additive effect forces the treatments to have identical absolute values over the experimental treatment which alters the fit of the smoother, in particular the start and end value, contorting our data. Therefore under this scenario we should go with gam_4. It is important to note that this is not always the case e.g. Chla can vary by absolute values between treatments as to can abundance etc. However if you have a good understanding of the parameter and follow this tutorial you should be able to appropriately select the best model and infer significance from this and visual inspection of the model.
 
 
