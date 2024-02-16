@@ -124,10 +124,9 @@ There is a limitation to our model comparison which becomes aparent when visuali
 
 
 
+Although we have already decided upon our best model above it is important to also check that the assumptions of GAMMs are being adequatley met for. We will do this as an example for Gam_4 however, it is good practice to do this for all models while keeping in mind that in some cases models will not meet the assumptions. This is only accetable if the model in question is not being used to describe the statistical significance of a variable (i.e. it is not your final model). It is also important that the random effects structure (s(Day,Microcosm, bs = "fs") and number of knots (k) is consistent across the models.
 
-Next we will check that the assumptions of GAMMs are being adequatley met for gam_4. Note, it is important to do this for all models while keeping in mind that in some cases models will not meet the assumptions. This is only accetable if the model in question is not being used to describe the statistical significance of a variable (i.e. it is not your final model).
-
-First we need to explore our model fit by comparing it to our actual data or averages for each treatment (overlay on gam_4
+First we can explore our model fit by comparing it to our actual data or averages for each treatment (overlay on gam_4)
 ```{r, eval=TRUE, echo = FLASE}
 avg_Y <- aggregate(Y ~ Treatment + Day, data = data, FUN = mean)
 
@@ -139,38 +138,35 @@ ggplot(data = avg_Y, aes(x = Day, y = Y, color = Treatment)) +
        y = "Average Y")
 ```
 
-It looks like our GAMM may be modelling some noise, see the control after day 5 where there is some wiggle in the model fit that is not reflected in the data. Now we can check our model and some of the assumptions of GAMs/GAMMS, we can do this using gam.check
+You will notice that our GAMM is fitting the real data well. If this was not the case we would re inspect our model as it is likely that we have forgot to include a variable which explains a significant proportion of the variance (e.g. treatment).
+
+Now we can check our model and some of the assumptions of GAMs/GAMMS, we can do this using gam.check
 ```{r, eval=TRUE, echo = FLASE}
 par(mfrow = c(2, 2))
-gam.check(gam_1)
 gam.check(gam_4)
 ```
-Looking at the plots you'll notice a few things, our model struggles to fit assumptions of gaussian data, mainly a normal dsitribution (top left plot).
-In the console text you'll see significant p values. In this case, small p values indicate non-random distribution and suggest the model does not have enough basis functions. Basis functions are the functions which make up our smooth terms. Too many basis functions results in "overfitting", while too little results in important data being excluded.
-There are two things that can help with this; the first is transforming your data to improve the fit and the second is specifying the number of basis functions or "knots". In our case we should have as many "knots" as we have days/measurements. Knots are specified using "k=" in your smooth term for x (Day).
-```{r, eval=TRUE, echo = FLASE}
-gam_mod3 <- gam((Y) ~ s(Day, by = Treatment, k =12) + Treatment + s(Day,Microcosm, bs = "fs"),
-                family = gaussian (), method = "REML", data = data)
 
-par(mfrow = c(2, 2))
-gam.check(gam_mod3)
-```
-Looking again at our gam.check of gam_mod3, you will see the fit is relatively good for all except the top left plot. You may choose to transform this data, however, for this example you'll notice there is a slight visual improvement in the model fit. This is acceptable however, other options to improve the model fit include changing the "family" argument in your model to something that is better equipped to handle non-gaussian data e.g. "scat" or transforming the data.
+When looking at the four plots we ideally want 1) all points falling on the red line, 2) points randomly scattered around 0, 3) a normal distribution/bell curve shape and 4) a straight line. The plots shown here fit the desired outcomes relatively well and in this scenario we would accept that the assumptions of our model are being met. In scenarios where this is not the case it is important to consider; 1) the number of basis functions (k) which should be the same number of sampling days for the given parameter, 2) the "family" argument, what data type is your y variable, and 3) consider transforming the data.
+
+You will also notice some text in the console output. The main thing to check here is that the p-values are >0.05. If they are <0.05 it may mean that there are not enough basis functions (k). Basis functions are the functions which make up our smooth terms. Too many basis functions results in "overfitting", while too little results in important data being excluded.
+
+
+(basis functions pic)
 
 
 We must also check for concurvity. This checks to see if one of our smooth terms is the same as another smooth term. This is similar to colinearity in linear models. Note, we will need to specifiy "full=FALSE" to inspect matrices of pairwise concurvities. These show the degree to which each variable is predetermined by each other variable, rather than all  other variables.
 
 ```{r, eval=TRUE, echo = FLASE}
-concurvity(gam_mod3, full = FALSE)
+concurvity(gam_4, full = FALSE)
 ```
 
-This produces a large table in the console. When looking at this table you whould look at the "worst" table and ensure that all values are less
+This produces a large table in the console. When looking at this table you should look at the "worst" table and ensure that comaprisons between different treatments i.e. control vs equilibrated are less than 1 while comparisons between the same treatment will give a value of or close to 1. It is safe to ignore the column "Microcosm" here as the specification of Microcosm as a random effect prevents any meaningful interpretation here.
 
 Finally we can have a look at the model summary now
 ```{r, eval=TRUE, echo = FLASE}
-summary(gam_mod3)
+summary(gam_4)
 ```
 
-There is a lot to look at here but essentially the parametric coefficients explain our linear terms, in our case the additive term Treatment. But the Approximate significance of smooth terms is what we are interested in. "edf" is the effective degrees of freedom with 1 = a straight line and the higher the number the more wiggly the smooth function is. "ref.df" and "f" are test statistics used in anova but these are only approximate. Finally our p value is showing statistical significance of each term, however this is approximate only and it is recomended to a) visually check this and b) compare several models via AIC values to establish the significance of variables (which we will do next).
+There is a lot to look at here but essentially the parametric coefficients explain our linear terms, in our case the additive term Treatment. But the Approximate significance of smooth terms is what we are interested in. "edf" is the effective degrees of freedom with 1 = a straight line and the higher the number the more wiggly the smooth function is. "ref.df" and "f" are test statistics used in anova but these are only approximate. Finally our p value is showing statistical significance of each term, however this is approximate only and it is recomended to a) visually check this and b) compare several models via AIC values to establish the significance of variables (which we do above).
 
 
