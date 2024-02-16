@@ -107,7 +107,7 @@ Looking again at our gam.check you will see the fit is relatively good for all e
 
 
 We must also check for concurvity. This checks to see if one of our smooth terms is the same as another smooth term. This is similar to colinearity in linear models.
-Ideally we want values less than 0.8 in the worst row, however this doesn't suit our model. So we will need to specifiy "full=FALSE" to inspect matrices of pairwise concurvities. These show the degree to which each variable is predetermined by each other variable, rather than all  other variables.
+Ideally we want values less than 0.8 in the worst row. Note we will need to specifiy "full=FALSE" to inspect matrices of pairwise concurvities. These show the degree to which each variable is predetermined by each other variable, rather than all  other variables.
 You will notice that our our random effect was causing issues with the previous model but you can see that by specifying "full=FALSE" our assumptions for each treatment are now met
 ```{r, eval=TRUE, echo = FLASE}
 concurvity(gam_mod3, full = TRUE)
