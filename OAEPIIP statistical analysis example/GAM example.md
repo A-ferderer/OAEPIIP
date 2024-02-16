@@ -7,6 +7,7 @@ First we need to load the necesarry packages (note if you have not installed the
 library(mgcv)
 library(mgcViz)
 library(itsadug)
+library(ggplot)
 
 ```
 You will also need to download the csv file from the repository "GAM_example.csv".
@@ -51,16 +52,16 @@ gam_mod1 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "fs"),
 
 plot_smooth(gam_mod1, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
-Now that we have accounted for the temporal pseudoreplication we can add our "Treatment". There are several ways to add Treatment to the model (which we will explore later) but for now we will add it so that it accounts for the most variability possible.
+Now that we have accounted for the temporal pseudoreplication we can add our "Treatment". There are several ways to add Treatment to the model (which we will explore later) but for now we will add it so that it accounts for the highest possible variability.
 
-You will notice "Treatment" appears twice in the model. The first instance "s(Day, by = Treatment)" allows the smooth function to vary by each level of "Treatment". The second instance "+ Treatment" is specifying Treatment as an additive variable and allows the smoothers to vary by intercept for each level of Treatment.
+You will notice "Treatment" appears twice in the model. The first instance "s(Day, by = Treatment)" creates three smooth functions, on for each level of the Treatment (e.g. control, equilibrated and unequilibrated). The second instance "+ Treatment" is specifying Treatment as an additive variable and allows the smoothers to vary by intercept for each level of the Treatment.
 ```{r, eval=TRUE, echo = FLASE}
 gam_mod2 <- gam(Y ~ s(Day, by = Treatment) + Treatment + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
 plot_smooth(gam_mod2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
-Now we need to explore our model fit. First we can compare our model to our actual data or averages for each treatment
+Now we need to explore our model fit by comparing it to our actual data or averages for each treatment
 ```{r, eval=TRUE, echo = FLASE}
 avg_Y <- aggregate(Y ~ Treatment + Day, data = data, FUN = mean)
 
@@ -72,14 +73,14 @@ ggplot(data = avg_Y, aes(x = Day, y = Y, color = Treatment)) +
        y = "Average Y")
 ```
 
-It looks like our GAMM may be modelling some noise, see the control after day 5. Lets check our model and some of the assumptions of GAMs/GAMMS, we can do this using gam.check
+It looks like our GAMM may be modelling some noise, see the control after day 5 where there is some wiggle in the model fit that is not reflected in the data. Now we can check our model and some of the assumptions of GAMs/GAMMS, we can do this using gam.check
 ```{r, eval=TRUE, echo = FLASE}
 par(mfrow = c(2, 2))
 gam.check(gam_mod2)
 ```
-Looking at the plots you'll notice a few things, our model struggles to fit assumptions of gaussian data, mainly a normal dsitribution (top right plot).
-In the text you'll see significant p values, in this space small p values indicate non-random distribution and suggests the model is not using enough basis functions. Basis functions are the functions which make up our smooth terms, to many results in "overfitting", while too little results in important data being excluded.
-There are two things that can help with this the first is transforming your data to improve the fit and the second is specifying the number of basis functions or knots. In our case we should have as many knots as we have days/measurements. Knots are specified using "k=" in your smooth term for x
+Looking at the plots you'll notice a few things, our model struggles to fit assumptions of gaussian data, mainly a normal dsitribution (top left plot).
+In the console text you'll see significant p values. In this case, small p values indicate non-random distribution and suggest the model does not have enough basis functions. Basis functions are the functions which make up our smooth terms. Too many basis functions results in "overfitting", while too little results in important data being excluded.
+There are two things that can help with this; the first is transforming your data to improve the fit and the second is specifying the number of basis functions or "knots". In our case we should have as many "knots" as we have days/measurements. Knots are specified using "k=" in your smooth term for x (Day).
 ```{r, eval=TRUE, echo = FLASE}
 gam_mod3 <- gam((Y) ~ s(Day, by = Treatment, k =12) + Treatment + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
@@ -87,16 +88,16 @@ gam_mod3 <- gam((Y) ~ s(Day, by = Treatment, k =12) + Treatment + s(Day,Microcos
 par(mfrow = c(2, 2))
 gam.check(gam_mod3)
 ```
-Looking again at our gam.check you will see the fit is relatively good for all except the top left plot. You may chose to transform this data however for this example you'll notice see there is no visual improvement in the model fit, so we will leave it as is. The other option is to change the "family" argument in your model to something that is better equipped to handle non-gaussian data e.g. "scat".
+Looking again at our gam.check of gam_mod3, you will see the fit is relatively good for all except the top left plot. You may choose to transform this data, however, for this example you'll notice there is a slight visual improvement in the model fit. This is acceptable however, other options to improve the model fit include changing the "family" argument in your model to something that is better equipped to handle non-gaussian data e.g. "scat" or transforming the data.
 
 
-We must also check for concurvity. This checks to see if one of our smooth terms is the same as another smooth term. This is similar to colinearity in linear models.
-Ideally we want values less than 0.8 in the worst row. Note we will need to specifiy "full=FALSE" to inspect matrices of pairwise concurvities. These show the degree to which each variable is predetermined by each other variable, rather than all  other variables.
-You will notice that our our random effect was causing issues with the previous model but you can see that by specifying "full=FALSE" our assumptions for each treatment are now met
+We must also check for concurvity. This checks to see if one of our smooth terms is the same as another smooth term. This is similar to colinearity in linear models. Note, we will need to specifiy "full=FALSE" to inspect matrices of pairwise concurvities. These show the degree to which each variable is predetermined by each other variable, rather than all  other variables.
+
 ```{r, eval=TRUE, echo = FLASE}
-concurvity(gam_mod3, full = TRUE)
 concurvity(gam_mod3, full = FALSE)
 ```
+
+Ideally we want values less than 0.8. 
 
 Finally we can have a look at the model summary now
 ```{r, eval=TRUE, echo = FLASE}
