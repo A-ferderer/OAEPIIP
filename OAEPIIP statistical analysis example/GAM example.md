@@ -1,6 +1,5 @@
-GAM example
+Here we demonstrate one way to analyse the data which is likely to be collected during your OAEPIIP experiment. We have previously used this method to assess simialr dataset and therefore recoemnd the use of Generalised additive mixed models (GAMMs) here as well. We highlight that this is not a tutorial and as such will not have in depth explanations or background information. If the reader desires such explanations we recomend reading S. N. Wood (2006) (https://doi.org/10.1201/9781315370279)
 
-Now that we understand why GAMs can be so useful, let's have a look at a dataset which is similar to what can be expected from OAEPIIP.
 First we need to load the necesarry packages (note if you have not installed these packages you will need to install them first using "install.packages()).
 
 ```{r, eval=TRUE,echo = FALSE}
@@ -10,6 +9,7 @@ library(itsadug)
 library(ggplot)
 
 ```
+
 You will also need to download the csv file from the repository "GAM_example.csv".
 Now you can import this dataset and inspect the data 
 
@@ -18,6 +18,7 @@ data = read.csv("GAM_example.csv",fileEncoding = "UTF-8-BOM")
 head(data)
 str(data)
 ```
+
 You will notice that microcosm and treatment are specified as character variables in our dataset. The mgcv package does not recognise character variables and thus we must change these to factor variables.
 
 ```{r, eval=TRUE, echo = FLASE}
@@ -25,89 +26,8 @@ data$Microcosm = as.factor(data$Microcosm)
 data$Treatment = as.factor(data$Treatment)
 str(data)
 ```
-First we will fit a simple GAM model and explore possible plotting functions. There are many ways to visualise GAMs e.g. using R's default graphics package, the mgcViz package and itsadug package.
-It is very importat to visualise GAMs as we will find out later, so it is good to understand the different ways to plot your results. You will also notice all the plots look relatively similar but as our model gets more complex you will undertsand why we use various plotting packages.
 
-```{r, eval=TRUE, echo = FLASE}
-gam_mod <- gam(Y ~ s(Day), 
-               family = gaussian (), method = "REML", data = data)
-
-plot(gam_mod, residuals = TRUE, pch = 1)
-
-plot(gam_mod, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
-     pages = 2, all.terms = TRUE, seWithMean = TRUE)
-
-plot_smooth(gam_mod, view = "Day", main = "intercept + s(Day)")
-```
-
-There are two issues that we need to adress before this model is applicable to the data collected during OAEPIIP. The first inolves accounting for temporal pseudoreplication caused by repeated measurements from each microcosm.
-
-To account for temporal pseudo replication we will add "Microcosm" as a random effect. For those with experience in linear mixed effects models you will know that there are several ways of fitting random effects, e.g. random intercepts, random slopes and in gams random smooths as well. Here, we will fit Microcosm so that each level of the random effect (or each microcosm) will have its own smooth. If you want to see other ways a random effect can be fitted see the "Random effetcs.md"
-
-Note, when we add a random variable to a GAM it becomes a Generalised Additive Mixed Model or GAMM.
-
-```{r, eval=TRUE, echo = FLASE}
-gam_mod1 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "fs"),
-                family = gaussian (), method = "REML", data = data)
-
-plot_smooth(gam_mod1, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
-```
-Now that we have accounted for the temporal pseudoreplication we can add our "Treatment". There are several ways to add Treatment to the model (which we will explore later) but for now we will add it so that it accounts for the highest possible variability.
-
-You will notice "Treatment" appears twice in the model. The first instance "s(Day, by = Treatment)" creates three smooth functions, on for each level of the Treatment (e.g. control, equilibrated and unequilibrated). The second instance "+ Treatment" is specifying Treatment as an additive variable and allows the smoothers to vary by intercept for each level of the Treatment.
-```{r, eval=TRUE, echo = FLASE}
-gam_mod2 <- gam(Y ~ s(Day, by = Treatment) + Treatment + s(Day,Microcosm, bs = "fs"),
-                family = gaussian (), method = "REML", data = data)
-plot_smooth(gam_mod2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
-```
-
-Now we need to explore our model fit by comparing it to our actual data or averages for each treatment
-```{r, eval=TRUE, echo = FLASE}
-avg_Y <- aggregate(Y ~ Treatment + Day, data = data, FUN = mean)
-
-ggplot(data = avg_Y, aes(x = Day, y = Y, color = Treatment)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Average Y by Treatment",
-       x = "Day",
-       y = "Average Y")
-```
-
-It looks like our GAMM may be modelling some noise, see the control after day 5 where there is some wiggle in the model fit that is not reflected in the data. Now we can check our model and some of the assumptions of GAMs/GAMMS, we can do this using gam.check
-```{r, eval=TRUE, echo = FLASE}
-par(mfrow = c(2, 2))
-gam.check(gam_mod2)
-```
-Looking at the plots you'll notice a few things, our model struggles to fit assumptions of gaussian data, mainly a normal dsitribution (top left plot).
-In the console text you'll see significant p values. In this case, small p values indicate non-random distribution and suggest the model does not have enough basis functions. Basis functions are the functions which make up our smooth terms. Too many basis functions results in "overfitting", while too little results in important data being excluded.
-There are two things that can help with this; the first is transforming your data to improve the fit and the second is specifying the number of basis functions or "knots". In our case we should have as many "knots" as we have days/measurements. Knots are specified using "k=" in your smooth term for x (Day).
-```{r, eval=TRUE, echo = FLASE}
-gam_mod3 <- gam((Y) ~ s(Day, by = Treatment, k =12) + Treatment + s(Day,Microcosm, bs = "fs"),
-                family = gaussian (), method = "REML", data = data)
-
-par(mfrow = c(2, 2))
-gam.check(gam_mod3)
-```
-Looking again at our gam.check of gam_mod3, you will see the fit is relatively good for all except the top left plot. You may choose to transform this data, however, for this example you'll notice there is a slight visual improvement in the model fit. This is acceptable however, other options to improve the model fit include changing the "family" argument in your model to something that is better equipped to handle non-gaussian data e.g. "scat" or transforming the data.
-
-
-We must also check for concurvity. This checks to see if one of our smooth terms is the same as another smooth term. This is similar to colinearity in linear models. Note, we will need to specifiy "full=FALSE" to inspect matrices of pairwise concurvities. These show the degree to which each variable is predetermined by each other variable, rather than all  other variables.
-
-```{r, eval=TRUE, echo = FLASE}
-concurvity(gam_mod3, full = FALSE)
-```
-
-This produces a large table in the console. When looking at this table you whould look at the "worst" table and ensure that all values are less
-
-Finally we can have a look at the model summary now
-```{r, eval=TRUE, echo = FLASE}
-summary(gam_mod3)
-```
-
-There is a lot to look at here but essentially the parametric coefficients explain our linear terms, in our case the additive term Treatment. But the Approximate significance of smooth terms is what we are interested in. "edf" is the effective degrees of freedom with 1 = a straight line and the higher the number the more wiggly the smooth function is. "ref.df" and "f" are test statistics used in anova but these are only approximate. Finally our p value is showing statistical significance of each term, however this is approximate only and it is recomended to a) visually check this and b) compare several models via AIC values to establish the significance of variables (which we will do next).
-
-
-There are four potential scenarios we would like to assess with our significance testing
+For the OAEPIIP there are four potential scenarios we would like to assess with our significance testing
 1. The treatment has no significant effect on the dependent variable
 2. The Treatment significantly effects the time at which changes in the dependent variable occur
 3. The treatment has an effect on the absolute values of the dependent variable
@@ -117,7 +37,7 @@ There are four potential scenarios we would like to assess with our significance
 
 adapted from Ferderer et al. (2022) (https://doi.org/10.5194/bg-19-5375-2022)
 
-In order to assess these we need to vary how the independent variable is entered into our model, shown below;
+In order to assess these we need to vary how the independent variable is included into our GAMM.
 
 1. gam_1 assumes Treatment is not significant and therefore we don't need to include it in the model (this is the same as gam_mod1 with the addition of "k=12")
 2. gam_2 assumes the Treatment has a significant influence on the timing of the dependent variable, thus we let Day vary by Treatment
@@ -125,13 +45,14 @@ In order to assess these we need to vary how the independent variable is entered
 4. gam_4 assumes the Treatment has a significant influence on the absolute value and timing of the dependent variable, thus we add treatment as an additive variable and let day vary by treatment
 
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod1 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs"),
+gam_1 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
 par(mfrow = c(1, 1))
 plot(gam_1, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
      pages = 1, all.terms = TRUE, seWithMean = TRUE)
 plot_smooth(gam_1, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
-# you will notice an error here saying that the two smooth terms are essentially repeating the same information or are highly correlated. this is okay as we know this is likely the case
+# you will notice an error here saying that the two smooth terms are essentially repeating the same information or are highly correlated. This is okay as we know this is likely the case
+
 
 gam_2 <- gam((Y) ~ s(Day, by = Treatment, k =12) + s(Day,Microcosm, bs = "fs"),
              family = gaussian (), method = "REML", data = data)
@@ -139,11 +60,13 @@ plot(gam_2, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "light
      pages = 1, all.terms = TRUE, seWithMean = TRUE)
 plot_smooth(gam_2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
 
+
 gam_3 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs") + Treatment,
              family = gaussian (), method = "REML", data = data)
 plot(gam_3, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
      pages = 1, all.terms = TRUE, seWithMean = TRUE)
 plot_smooth(gam_3, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
+
 
 gam_4 <- gam((Y) ~ s(Day,by =Treatment, k =12) + s(Day,Microcosm, bs = "fs") + Treatment,
              family = gaussian (), method = "REML", data = data)
@@ -151,8 +74,9 @@ plot(gam_4, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "light
      pages = 1, all.terms = TRUE, seWithMean = TRUE)
 plot_smooth(gam_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
+Building on the Introduction you will notice the addition of "k" and "s(Day,Microcosm, bs = "fs"" in all models. "K" is the number of basis functions or "knots". For our OAEPIIP dataset this will be the number of days our y-variable (e.g. nutrients) is measured. The other section "s(Day,Microcosm, bs = "fs"" is specifiying our random effect which controls for temporal pseudoreplication (repeated measurements from the same microcosms). Here, we fit Microcosm so that each level of the random effect (or each microcosm) has its own smooth.
 
-Now we can compare our models using AIC and R square values.
+Now we can compare our models using AIC and R square values. This will help us to work out which of our four models explains the data the best.
 ```{r, eval=TRUE, echo = FLASE}
 # Create a data frame to store the results
 model_results <- data.frame(Model = character(),
@@ -191,5 +115,62 @@ ggplot(data = avg_Y, aes(x = Day, y = Y, color = Treatment)) +
 ```
 
 There is a limitation to our model comparison which becomes aparent when visualising the data. You will notice that gam_2 underestimates the difference in the slope of the relationship between Y and Days, particularly for the equilibrated treatment. This data is an example of dissolved inorganic nutrient data thus we would expect there to be no difference in y (the amounts/concentrations) between treatments. When we comapre the start and end values given for "y" this is true. However our model comparison shows that although this is true gam_4 provides a better fit to the actual data. This is because in gam_2 the exclusion of treatment as an additive effect forces the treatments to have identical absolute values over the experimental treatment which alters the fit of the smoother, in particular the start and end value, contorting our data. Therefore under this scenario we should go with gam_4. It is important to note that this is not always the case e.g. Chla can vary by absolute values between treatments as to can abundance etc. However if you have a good understanding of the parameter and follow this tutorial you should be able to appropriately select the best model and infer significance from this and visual inspection of the model.
+
+
+
+
+
+
+
+
+
+
+Next we will check that the assumptions of GAMMs are being adequatley met for gam_4. Note, it is important to do this for all models while keeping in mind that in some cases models will not meet the assumptions. This is only accetable if the model in question is not being used to describe the statistical significance of a variable (i.e. it is not your final model).
+
+First we need to explore our model fit by comparing it to our actual data or averages for each treatment (overlay on gam_4
+```{r, eval=TRUE, echo = FLASE}
+avg_Y <- aggregate(Y ~ Treatment + Day, data = data, FUN = mean)
+
+ggplot(data = avg_Y, aes(x = Day, y = Y, color = Treatment)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Average Y by Treatment",
+       x = "Day",
+       y = "Average Y")
+```
+
+It looks like our GAMM may be modelling some noise, see the control after day 5 where there is some wiggle in the model fit that is not reflected in the data. Now we can check our model and some of the assumptions of GAMs/GAMMS, we can do this using gam.check
+```{r, eval=TRUE, echo = FLASE}
+par(mfrow = c(2, 2))
+gam.check(gam_1)
+gam.check(gam_4)
+```
+Looking at the plots you'll notice a few things, our model struggles to fit assumptions of gaussian data, mainly a normal dsitribution (top left plot).
+In the console text you'll see significant p values. In this case, small p values indicate non-random distribution and suggest the model does not have enough basis functions. Basis functions are the functions which make up our smooth terms. Too many basis functions results in "overfitting", while too little results in important data being excluded.
+There are two things that can help with this; the first is transforming your data to improve the fit and the second is specifying the number of basis functions or "knots". In our case we should have as many "knots" as we have days/measurements. Knots are specified using "k=" in your smooth term for x (Day).
+```{r, eval=TRUE, echo = FLASE}
+gam_mod3 <- gam((Y) ~ s(Day, by = Treatment, k =12) + Treatment + s(Day,Microcosm, bs = "fs"),
+                family = gaussian (), method = "REML", data = data)
+
+par(mfrow = c(2, 2))
+gam.check(gam_mod3)
+```
+Looking again at our gam.check of gam_mod3, you will see the fit is relatively good for all except the top left plot. You may choose to transform this data, however, for this example you'll notice there is a slight visual improvement in the model fit. This is acceptable however, other options to improve the model fit include changing the "family" argument in your model to something that is better equipped to handle non-gaussian data e.g. "scat" or transforming the data.
+
+
+We must also check for concurvity. This checks to see if one of our smooth terms is the same as another smooth term. This is similar to colinearity in linear models. Note, we will need to specifiy "full=FALSE" to inspect matrices of pairwise concurvities. These show the degree to which each variable is predetermined by each other variable, rather than all  other variables.
+
+```{r, eval=TRUE, echo = FLASE}
+concurvity(gam_mod3, full = FALSE)
+```
+
+This produces a large table in the console. When looking at this table you whould look at the "worst" table and ensure that all values are less
+
+Finally we can have a look at the model summary now
+```{r, eval=TRUE, echo = FLASE}
+summary(gam_mod3)
+```
+
+There is a lot to look at here but essentially the parametric coefficients explain our linear terms, in our case the additive term Treatment. But the Approximate significance of smooth terms is what we are interested in. "edf" is the effective degrees of freedom with 1 = a straight line and the higher the number the more wiggly the smooth function is. "ref.df" and "f" are test statistics used in anova but these are only approximate. Finally our p value is showing statistical significance of each term, however this is approximate only and it is recomended to a) visually check this and b) compare several models via AIC values to establish the significance of variables (which we will do next).
 
 
