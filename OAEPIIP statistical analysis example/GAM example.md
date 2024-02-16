@@ -41,9 +41,9 @@ plot_smooth(gam_mod, view = "Day", main = "intercept + s(Day)")
 
 There are two issues that we need to adress before this model is applicable to the data collected during OAEPIIP. The first inolves accounting for temporal pseudoreplication caused by repeated measurements from each microcosm.
 
-To account for temporal pseudo replication we will add "Microcosm" as a random effect. For those with experience in linear mixed effects models you will know that there are several types of random effects random intercepts, random slopes and in gams random smooths as well. Here we will fit Microcosm so that each level of the random effect (or each microcosm) will have its own smooth. If you want to see other ways a random effect can be fitted see the "Random effetcs.md"
+To account for temporal pseudo replication we will add "Microcosm" as a random effect. For those with experience in linear mixed effects models you will know that there are several ways of fitting random effects, e.g. random intercepts, random slopes and in gams random smooths as well. Here, we will fit Microcosm so that each level of the random effect (or each microcosm) will have its own smooth. If you want to see other ways a random effect can be fitted see the "Random effetcs.md"
 
-Note when we add a random variable to a GAM it becomes a Generalised Additive Mixed Model or GAMM.
+Note, when we add a random variable to a GAM it becomes a Generalised Additive Mixed Model or GAMM.
 
 ```{r, eval=TRUE, echo = FLASE}
 gam_mod1 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "fs"),
