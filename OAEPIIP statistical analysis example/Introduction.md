@@ -14,9 +14,9 @@ head(mcycle)
 str(mcycle)
 plot(mcycle)
 ```
-The mcycle dataset has two numerical/continuous variables, times and accel. You will notice from the simple plot that the data is not linear. 
+The mcycle dataset has two numerical/continuous variables, times and accel. You will notice from the simple plot that the data is not linearly correlated
 
-We can now look at fitting a simple linear regression ot this dataset which will illustrate the primary issue with using linear models on non-linear datasets.
+We can now look at fitting a simple linear regression using this dataset which will illustrate the primary issue with using linear models on non-linear datasets.
 
 ```{r, eval=TRUE,echo = FALSE}
 lm_mod = lm(accel ~ times, data = mcycle)
@@ -34,7 +34,7 @@ Now we can fit our model following the same simple inputs used for our linear mo
 ```{r, eval=TRUE,echo = FALSE}
 gam_mod <- gam(accel ~ s(times), data = mcycle)
 ```
-This is the same as a model above with the exception that accel has now been fitted as a smooth function of the covariate "times". It is this smooth function which enables us to model non-linear relationships between two variables. For a more in depth explanation see XXX.
+This is the same as a model above with the exception that accel has now been fitted as a smooth function of the covariate "times". It is this smooth function which enables us to model non-linear relationships between two variables.
 
 A simple plot for visualising our model can be obtained using:
 ```{r, eval=TRUE,echo = FALSE}
@@ -42,6 +42,6 @@ plot(gam_mod, residuals = TRUE, pch = 1)
 ```
 In this plot you will see that we now have a non-linear relatioship and you can see from the plot that this model does a much better job of explaining raw our data.
 
-The datasets that you will develop during the OAEPIIP experiment is a little more complex than this simple dataset shown here. At the conclusion of your experiment you will have measured several variables (y) for each treatment (n=3) with three microcosms in each treatment and each of these microcosms being measured on serveral occasions over the experimental period.
-This is an example of a heirachial dataset with temporal pseudo replication. In order to deal with such a dataset you would normally use linear mixed effects models, however due to the non-linear nature of much of the data collected in phytoplankton time series datasets it is unlikely that these will be appropriate, hence the need for GAMs.
+The datasets that you will develop during the OAEPIIP experiment is potentially more complex than this simple dataset shown here. At the conclusion of your experiment you will have measured several variables (y) for each treatment (n=3) with three microcosms in each treatment and each of these microcosms being measured on serveral occasions over the experimental period.
+This is an example of a hierarchical dataset with temporal pseudo replication. In order to deal with such a dataset you would normally use linear mixed effects models, however due to the non-linear nature of much of the data collected in phytoplankton time series datasets it is unlikely that these will be appropriate, hence the need for GAMs.
 
