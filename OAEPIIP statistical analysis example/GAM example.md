@@ -24,29 +24,13 @@ data$Microcosm = as.factor(data$Microcosm)
 data$Treatment = as.factor(data$Treatment)
 str(data)
 ```
-
-As in the introduction we will first fit a simple linear model and inspect a plot of this overlaid on the actual data
-```{r, eval=TRUE, echo = FLASE}
-lm_mod = lm(Y ~ Day, data = data)
-termplot(lm_mod, partial.resid = TRUE, se = TRUE)
-```
-
-As you can see our linear model does a poor job of explaining the relationship between x and y. Let's fit a simple GAM model now
+First we will fit a simple GAM model and explore possible plotting functions. There are many ways to visualise GAMs e.g. using R's default graphics package, the mgcViz package and itsadug package.
+It is very importat to visualise GAMs as we will find out later, so it is good to understand the different ways to plot your results. You will also notice all the plots look relatively similar but as our model gets more complex you will undertsand why we use various plotting packages.
 
 ```{r, eval=TRUE, echo = FLASE}
 gam_mod <- gam(Y ~ s(Day), 
                family = gaussian (), method = "REML", data = data)
 
-```
-
-This is the same as the linear model but Day is fit as a smooth term. 
-You will notice we have added a few extra pieces of imformation to our model which weren't included in the introduction.
-First "family = gaussian" as we are assuming this data fits a normal distribution, however there are several other "families" which may be used depending on your data (e.g. count, bionomial, non-normal distribution) 
-The second is "method = "REML"," this involves the selection of the best fit smoothing parameter and you can read more about this in S. N. Wood (2006) (https://doi.org/10.1201/9781315370279), however for the purpose of running simple GAMs and our tutorial here we will use REML.
-
-Now let's have a look at the plot. There are many ways to do this, first simple plot using R's default graphics package, the mgcViz package and itsadug package.
-It is very importat to visualise GAMs as we will find out later, so it is good to understand the different ways to plot your results
-```{r, eval=TRUE, echo = FLASE}
 plot(gam_mod, residuals = TRUE, pch = 1)
 
 plot(gam_mod, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
@@ -54,12 +38,12 @@ plot(gam_mod, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lig
 
 plot_smooth(gam_mod, view = "Day", main = "intercept + s(Day)")
 ```
-You will also notice all the plots look relatively similar but as our model gets more complex you will undertsand why we use various plotting packages.
-Although this model shows a better fit when comapred to the previous linear model, there are two issues that we need to adress before this model is applicable to the data collected during OAEPIIP. The first is the  accounting for temporal pseudoreplication caused by repeated measurements from each microcosm.
+
+There are two issues that we need to adress before this model is applicable to the data collected during OAEPIIP. The first inolves accounting for temporal pseudoreplication caused by repeated measurements from each microcosm.
 
 To account for temporal pseudo replication we will add "Microcosm" as a random effect. For those with experience in linear mixed effects models you will know that there are several types of random effects random intercepts, random slopes and in gams random smooths as well. Here we will fit Microcosm so that each level of the random effect (or each microcosm) will have its own smooth. If you want to see other ways a random effect can be fitted see the "Random effetcs.md"
 
-Note when we add a random variable to a GAM it is called a Generalised Additive Mixed Model or GAMM.
+Note when we add a random variable to a GAM it becomes a Generalised Additive Mixed Model or GAMM.
 
 ```{r, eval=TRUE, echo = FLASE}
 gam_mod1 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "fs"),
