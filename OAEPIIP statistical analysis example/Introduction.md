@@ -32,7 +32,8 @@ library(mgcv)
 Now we can fit our model following the same simple inputs used for our linear model above.
 
 ```{r, eval=TRUE,echo = FALSE}
-gam_mod <- gam(accel ~ s(times), data = mcycle)
+gam_mod <- gam(accel ~ s(times), data = mcycle,
+ family = gaussian (), method = "REML")
 ```
 This is the same as a model above with the exception that accel has now been fitted as a smooth function of the covariate "times". It is this smooth function which enables us to model non-linear relationships between two variables.
 
