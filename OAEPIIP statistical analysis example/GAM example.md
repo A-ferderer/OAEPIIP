@@ -56,52 +56,52 @@ plot_smooth(gam_mod, view = "Day", main = "intercept + s(Day)")
 You will also notice all the plots look relatively similar but as our model gets more complex you will undertsand why we use various plotting packages.
 Although this model shows a better fit when comapred to the previous linear model, there are two issues that we need to adress before this model is applicable to the data collected during OAEPIIP. The first is the  accounting for temporal pseudoreplication caused by repeated measurements from each microcosm.
 
-To account for temporal pseudo replication we will add "Microcosm" as a random effect. For those with experience in linear mixed effects models you will know that there are several types of random effects random intercepts, random slopes and in gams random smooths as well. Here we go through the 4 ways to fit random effects but it is most likely that you will need to use the final method shown in "gam_mod6". Note when we add a random variable to a GAM it is called a Generalised Additive Mixed Model or GAMM.
+To account for temporal pseudo replication we will add "Microcosm" as a random effect. For those with experience in linear mixed effects models you will know that there are several types of random effects random intercepts, random slopes and in gams random smooths as well. Here we go through the 4 ways to fit random effects but it is most likely that you will need to use the final method shown in "gam_mod4". Note when we add a random variable to a GAM it is called a Generalised Additive Mixed Model or GAMM.
 
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod3 <- gam(Y ~ s(Day) + s(Microcosm, bs = "re"),
+gam_mod1 <- gam(Y ~ s(Day) + s(Microcosm, bs = "re"),
                 family = gaussian (), method = "REML", data = data)
 
-plot(gam_mod3, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
+plot(gam_mod1, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
      pages = 1, all.terms = TRUE, seWithMean = TRUE)
 
 # Plot the summed effect of Day (without random effects)
-plot_smooth(gam_mod3, view = "Day", rm.ranef = TRUE, main = "intercept + s(Day)")
+plot_smooth(gam_mod1, view = "Day", rm.ranef = TRUE, main = "intercept + s(Day)")
 # Plot each level of the random effect
-plot_smooth(gam_mod3, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
+plot_smooth(gam_mod1, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
 Now we will let the slope of microcosm vary but we have a fixed intercept or start point
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod4 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "re"),
+gam_mod2 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "re"),
                 family = gaussian (), method = "REML", data = data)
 
-plot_smooth(gam_mod4, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
+plot_smooth(gam_mod2, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
 Now we can let the intercept and slope vary. You'll notice there is almsot no difference between this plot and the plot for model4 as all microcosms started from the same source/body of water and therefore had the same y values to begin with
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod5 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "re")+ s(Day,Microcosm, bs = "re"),
+gam_mod3 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "re")+ s(Day,Microcosm, bs = "re"),
                 family = gaussian (), method = "REML", data = data)
 
-plot_smooth(gam_mod5, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
+plot_smooth(gam_mod3, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
 Finally we will let each level of the random effect (microcosm) have its own smooth.
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod6 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "fs"),
+gam_mod4 <- gam(Y ~ s(Day) + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
 
-plot_smooth(gam_mod6, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
+plot_smooth(gam_mod4, view="Day", plot_all="Microcosm", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
 
 Now that we have accounted for the temporal pseudoreplication we can add "Treatment" to our model.
 You will notice "Treatment" appears twice in the model. The first instance "s(Day, by = Treatment)" allows the smooth function to vary by each level of "Treatment". The second instance "+ Treatment" is specifying Treatment as an additive variable and allows the smoothers to vary by intercept for each level of Treatment.
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod6 <- gam(Y ~ s(Day, by = Treatment) + Treatment + s(Day,Microcosm, bs = "fs"),
+gam_mod5 <- gam(Y ~ s(Day, by = Treatment) + Treatment + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
-plot_smooth(gam_mod6, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
+plot_smooth(gam_mod5, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
 ```
 
 Lets compare this to our actual data or averages for each treatment
@@ -125,11 +125,11 @@ Looking at the plots you'll notice a few things, our model struggles to fit assu
 In the text you'll see significant p values, in this space small p values indicate non-random distribution and suggests the model is not using enough basis functions. Basis functions are the functions which make up our smooth terms, to many and you will overfit the model and include noise, to little and you get a linear model.
 There are two things that can help with this the first is transforming your data to improve the fit and the second is specifying the number of basis functions or knots. In our case we should have as many knots as we have days/measurements. Knots are specified using "k=" in your smooth term for x
 ```{r, eval=TRUE, echo = FLASE}
-gam_mod7 <- gam((Y) ~ s(Day, by = Treatment, k =12) + Treatment + s(Day,Microcosm, bs = "fs"),
+gam_mod6 <- gam((Y) ~ s(Day, by = Treatment, k =12) + Treatment + s(Day,Microcosm, bs = "fs"),
                 family = gaussian (), method = "REML", data = data)
 
 par(mfrow = c(2, 2))
-gam.check(gam_mod7)
+gam.check(gam_mod6)
 ```
 Looking again at our gam.check you will see the fit is relatively good for all except the top left plot. You may chose to transform this data however for this example you'll notice see there is no visual improvement in the model fit, so we will leave it as is. The other option is to change the "family" argument in your model to something that is better equipped to handle non-gaussian data e.g. "scat".
 
