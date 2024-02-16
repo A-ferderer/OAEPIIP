@@ -48,11 +48,9 @@ It is very importat to visualise GAMs as we will find out later, so it is good t
 ```{r, eval=TRUE, echo = FLASE}
 plot(gam_mod, residuals = TRUE, pch = 1)
 
-library(mgcViz)
 plot(gam_mod, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", 
      pages = 2, all.terms = TRUE, seWithMean = TRUE)
 
-library(itsadug)
 plot_smooth(gam_mod, view = "Day", main = "intercept + s(Day)")
 ```
 You will also notice all the plots look relatively similar but as our model gets more complex you will undertsand why we use various plotting packages.
