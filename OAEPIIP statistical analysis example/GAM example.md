@@ -113,6 +113,7 @@ There are four main scenarios we would like to assess with our significance test
 4. The treatment has a significant effect on the timing and absolute values of the dependent variable 
 
 ![OAEPIIP_example](https://github.com/OAEPIIP/OAEPIIP-Statistics-example/assets/113956826/2b85b854-e4f1-4339-a1a0-fa69fe1fd635)
+
 adapted from Ferderer et al. (2022)
 
 In order to assess these we need to vary how the independent variable is entered into our model this was discussed above but we will go through it again here;
