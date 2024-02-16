@@ -35,7 +35,7 @@ Now we can fit our model following the same simple inputs used for our linear mo
 gam_mod <- gam(accel ~ s(times), data = mcycle,
  family = gaussian (), method = "REML")
 ```
-This is the same as a model above with the exception that accel has now been fitted as a smooth function of the covariate "times". It is this smooth function which enables us to model non-linear relationships between two variables.
+This is the same as a model above with the exception that accel has now been fitted as a smooth function of the covariate "times". It is this smooth function which enables us to model non-linear relationships between two variables. You will notice a few extra terms in our model as well. First "family = gaussian" as we are assuming this data fits a normal distribution, however there are several other "families" which may be used depending on your data (e.g. count, bionomial, non-normal distribution). The second is "method = "REML"," this involves the selection of the best fit smoothing parameter and you can read more about this in S. N. Wood (2006) (https://doi.org/10.1201/9781315370279), however for the purpose of running simple GAMs and our tutorial here we will use REML.
 
 A simple plot for visualising our model can be obtained using:
 ```{r, eval=TRUE,echo = FALSE}
