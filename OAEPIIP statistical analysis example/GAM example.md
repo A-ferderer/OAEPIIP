@@ -70,9 +70,9 @@ plot(gam_4, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "light
 plot_smooth(gam_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
 with(data, points(Day, Y, col = "grey50", pch = 16))#overlaying raw data on GAMM model output
 ```
-Building on the Introduction you will notice the addition of "k" and "s(Day,Microcosm, bs = "fs"" in all models. "K" is the number of basis functions or "knots". For our OAEPIIP dataset this will be the number of days our y-variable (e.g. nutrients) is measured. The other section "s(Day,Microcosm, bs = "fs"" is specifiying our random effect which controls for temporal pseudoreplication (repeated measurements from the same microcosms). Here, we fit Microcosm so that each level of the random effect (or each microcosm) has its own smooth.
+Building on the [Introduction]( https://github.com/OAEPIIP/OAEPIIP-Statistics-example/blob/main/OAEPIIP%20statistical%20analysis%20example/Introduction.md) you will notice the addition of "k" and "s(Day,Microcosm, bs = "fs"" in all models. "K" is the number of basis functions or "knots" (see [S. N. Wood (2006)]( https://www.taylorfrancis.com/books/mono/10.1201/9781315370279/generalized-additive-models-simon-wood) for more details). For our OAEPIIP dataset this will be the number of days our y-variable (e.g. nutrients) is measured. The other section "s(Day,Microcosm, bs = "fs"" specifies our random effect which controls for temporal pseudoreplication (repeated measurements from the same microcosm). Here, we fit Microcosm so that each level of the random effect (or each microcosm) has its own smooth.
 
-Now we can compare our models using AIC and R square values. This will help us to work out which of our four models explains the data the best.
+Now we can compare our models using AIC and R square values. This will help us decide which of our four models explains our data the best.
 ```{r, eval=TRUE, echo = FLASE}
 # Create a data frame to store the results
 model_results <- data.frame(Model = character(),
