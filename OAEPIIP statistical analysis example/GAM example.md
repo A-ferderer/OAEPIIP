@@ -11,11 +11,11 @@ library(ggplot)
 
 ```
 
-You will also need to download the csv file from the repository "GAM_example.csv".
+You will also need to download the csv file from the repository "GAMM_example.csv".
 Now you can import this dataset and inspect the data 
 
 ```{r, eval=TRUE, echo = FLASE}
-data = read.csv("GAM_example.csv",fileEncoding = "UTF-8-BOM")
+data = read.csv("GAMM_example.csv",fileEncoding = "UTF-8-BOM")
 head(data)
 str(data)
 ```
@@ -110,7 +110,7 @@ ggplot(data = avg_Y, aes(x = Day, y = Y, color = Treatment)) +
        y = "Average Y")
 ```
 
-There is a limitation to our model comparison which becomes aparent when visualising the data. You will notice that gam_2 underestimates the difference in the slope of the relationship between Y and Days, particularly for the equilibrated treatment. This data is an example of dissolved inorganic nutrient data thus we would expect there to be no difference in y (the amounts/concentrations) between treatments. When we comapre the start and end values given for "y" this is true. However our model comparison shows that although this is true gam_4 provides a better fit to the actual data. This is because in gam_2 the exclusion of treatment as an additive effect forces the treatments to have identical absolute values over the experimental treatment which alters the fit of the smoother, in particular the start and end value, contorting our data. Therefore under this scenario we should go with gam_4. It is important to note that this is not always the case e.g. Chla can vary by absolute values between treatments as to can abundance etc. However if you have a good understanding of the parameter and follow this tutorial you should be able to appropriately select the best model and infer significance from this and visual inspection of the model.
+There is a limitation to our model comparison which becomes aparent when visualising the data. You will notice that gamm_2 underestimates the difference in the slope of the relationship between Y and Days, particularly for the equilibrated treatment. This data is an example of dissolved inorganic nutrient data thus we would expect there to be no difference in y (the amounts/concentrations) between treatments. When we comapre the start and end values given for "y" this is true. However our model comparison shows that although this is true gamm_4 provides a better fit to the actual data. This is because in gamm_2 the exclusion of treatment as an additive effect forces the treatments to have identical absolute values over the experimental treatment which alters the fit of the smoother, in particular the start and end value, contorting our data. Therefore under this scenario we should go with gamm_4. It is important to note that this is not always the case e.g. Chla can vary by absolute values between treatments as to can abundance etc. However if you have a good understanding of the parameter and follow this tutorial you should be able to appropriately select the best model and infer significance from this and visual inspection of the model.
 
 
 
@@ -120,9 +120,9 @@ There is a limitation to our model comparison which becomes aparent when visuali
 
 
 
-Although we have already decided upon our best model above it is important to also check that the assumptions of GAMMs are being adequatley met for. We will do this as an example for Gam_4 however, it is good practice to do this for all models while keeping in mind that in some cases models will not meet the assumptions. This is only accetable if the model in question is not being used to describe the statistical significance of a variable (i.e. it is not your final model). It is also important that the random effects structure (s(Day,Microcosm, bs = "fs") and number of knots (k) is consistent across the models.
+Although we have already decided upon our best model above it is important to also check that the assumptions of GAMMs are being adequatley met for. We will do this as an example for Gamm_4 however, it is good practice to do this for all models while keeping in mind that in some cases models will not meet the assumptions. This is only accetable if the model in question is not being used to describe the statistical significance of a variable (i.e. it is not your final model). It is also important that the random effects structure (s(Day,Microcosm, bs = "fs") and number of knots (k) is consistent across the models.
 
-First we can explore our model fit by comparing it to our actual data or averages for each treatment (overlay on gam_4)
+First we can explore our model fit by comparing it to our actual data or averages for each treatment (overlay on gamm_4)
 ```{r, eval=TRUE, echo = FLASE}
 avg_Y <- aggregate(Y ~ Treatment + Day, data = data, FUN = mean)
 
@@ -139,7 +139,7 @@ You will notice that our GAMM is fitting the real data well. If this was not the
 Now we can check our model and some of the assumptions of GAMs/GAMMS, we can do this using gam.check
 ```{r, eval=TRUE, echo = FLASE}
 par(mfrow = c(2, 2))
-gam.check(gam_4)
+gam.check(gamm_4)
 ```
 
 When looking at the four plots we ideally want 1) all points falling on the red line, 2) points randomly scattered around 0, 3) a normal distribution/bell curve shape and 4) a straight line. The plots shown here fit the desired outcomes relatively well and in this scenario we would accept that the assumptions of our model are being met. In scenarios where this is not the case it is important to consider; 1) the number of basis functions (k) which should be the same number of sampling days for the given parameter, 2) the "family" argument, what data type is your y variable, and 3) consider transforming the data.
@@ -153,14 +153,14 @@ You will also notice some text in the console output. The main thing to check he
 We must also check for concurvity. This checks to see if one of our smooth terms is the same as another smooth term. This is similar to colinearity in linear models. Note, we will need to specifiy "full=FALSE" to inspect matrices of pairwise concurvities. These show the degree to which each variable is predetermined by each other variable, rather than all  other variables.
 
 ```{r, eval=TRUE, echo = FLASE}
-concurvity(gam_4, full = FALSE)
+concurvity(gamm_4, full = FALSE)
 ```
 
 This produces a large table in the console. When looking at this table you should look at the "worst" table and ensure that comaprisons between different treatments i.e. control vs equilibrated are less than 1 while comparisons between the same treatment will give a value of or close to 1. It is safe to ignore the column "Microcosm" here as the specification of Microcosm as a random effect prevents any meaningful interpretation here.
 
 Finally we can have a look at the model summary now
 ```{r, eval=TRUE, echo = FLASE}
-summary(gam_4)
+summary(gamm_4)
 ```
 
 There is a lot to look at here but essentially the parametric coefficients explain our linear terms, in our case the additive term Treatment. But the Approximate significance of smooth terms is what we are interested in. "edf" is the effective degrees of freedom with 1 = a straight line and the higher the number the more wiggly the smooth function is. "ref.df" and "f" are test statistics used in anova but these are only approximate. Finally our p value is showing statistical significance of each term, however this is approximate only and it is recomended to a) visually check this and b) compare several models via AIC values to establish the significance of variables (which we do above).
