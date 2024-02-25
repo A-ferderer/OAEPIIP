@@ -1,6 +1,7 @@
-Here we demonstrate one way to analyse the data which is likely to be collected during your OAEPIIP experiment. We have previously used this method to assess simialr dataset and therefore recoemnd the use of Generalised additive mixed models (GAMMs) here as well. We highlight that this is not a tutorial and as such will not have in depth explanations or background information. If the reader desires such explanations we recomend reading S. N. Wood (2006) (https://doi.org/10.1201/9781315370279)
+Here we demonstrate one way to analyse the data which is likely to be collected during your OAEPIIP experiment. We have previously used this method to assess similar dataset and therefore recommend the use of Generalised additive mixed models (GAMMs) here as well (see Ferderer et al., 2022). We highlight that this is not a tutorial and as such will not have in depth explanations or background information regarding the use of GAMMs. If the reader desires such explanations we recommend reading S. N. Wood (2006).
 
-First we need to load the necesarry packages (note if you have not installed these packages you will need to install them first using "install.packages()).
+First we need to load the necessary packages (note if you have not installed these packages you will need to install them first using "install.packages()).
+
 
 ```{r, eval=TRUE,echo = FALSE}
 library(mgcv)
