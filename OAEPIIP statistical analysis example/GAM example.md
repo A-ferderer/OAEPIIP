@@ -97,20 +97,16 @@ model_results[4, ] <- c("gamm_4", extract_model_info(gamm_4))
 print(model_results)
 ```
 
-You will notice that gamm_2 has the lowest AIC value but has the same R squared value as gamm_4. Furthermore the difference in AIC values is < 2 which is a general threshold for determining significant differences between models. Thus you could safely pick either model 2 or 4 in this case, but first we should inspect the plots
+You will notice that gamm_2 has the lowest AIC value but has the same R squared value as gamm_4. Furthermore, the difference in AIC values is < 2 which is a general threshold for determining significant differences between models. Thus, you could safely pick either model 2 or 4 in this case, but first we should inspect the plots.
 ```{r, eval=TRUE, echo = FLASE}
-par(mfrow = c(1, 1))
+par(mfrow = c(1, 2))#change plot view
 plot_smooth(gamm_2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
+with(data, points(Day, Y, col = "grey50", pch = 16))#overlaying raw data on GAMM model output
 plot_smooth(gamm_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
-ggplot(data = avg_Y, aes(x = Day, y = Y, color = Treatment)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Average Y by Treatment",
-       x = "Day",
-       y = "Average Y")
+with(data, points(Day, Y, col = "grey50", pch = 16))#overlaying raw data on GAMM model output
 ```
 
-There is a limitation to our model comparison which becomes aparent when visualising the data. You will notice that gamm_2 underestimates the difference in the slope of the relationship between Y and Days, particularly for the equilibrated treatment. This data is an example of dissolved inorganic nutrient data thus we would expect there to be no difference in y (the amounts/concentrations) between treatments. When we comapre the start and end values given for "y" this is true. However our model comparison shows that although this is true gamm_4 provides a better fit to the actual data. This is because in gamm_2 the exclusion of treatment as an additive effect forces the treatments to have identical absolute values over the experimental treatment which alters the fit of the smoother, in particular the start and end value, contorting our data. Therefore under this scenario we should go with gamm_4. It is important to note that this is not always the case e.g. Chla can vary by absolute values between treatments as to can abundance etc. However if you have a good understanding of the parameter and follow this tutorial you should be able to appropriately select the best model and infer significance from this and visual inspection of the model.
+There is a limitation to our model comparison which becomes apparent when visualising the data. You will notice that gamm_2 underestimates the difference in the slope of the relationship between Y and Days, particularly for the equilibrated treatment. This data is an example of dissolved inorganic nutrient data thus we would expect there to be no difference in y (the amounts/concentrations) between treatments. When we compare the start and end values given for "y" this is true. However, our model comparison shows that although this is true gamm_4 provides a better fit to the actual data. This is because in gamm_2 the exclusion of treatment as an additive effect forces the treatments to have identical absolute values over the experimental treatment which alters the fit of the smoother, in particular the start and end value, contorting our data. Therefore, under this scenario we should go with gamm_4. It is important to note that this is not always the case e.g. Chla can vary by absolute values between treatments as to can abundance etc. However, if you have a good understanding of the parameter and follow this tutorial you should be able to appropriately select the best model and infer significance from this and visual inspection of the model.
 
 
 
