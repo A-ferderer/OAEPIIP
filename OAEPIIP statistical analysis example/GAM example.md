@@ -40,34 +40,34 @@ adapted from Ferderer et al. (2022) (https://doi.org/10.5194/bg-19-5375-2022)
 
 In order to assess these we need to vary how the independent variable is included into our GAMM.
 
-1. gam_1 assumes Treatment is not significant and therefore we don't need to include it in the model (this is the same as gam_mod1 with the addition of "k=12")
-2. gam_2 assumes the Treatment has a significant influence on the timing of the dependent variable, thus we let Day vary by Treatment
-3. gam_3 assumes the Treatment has a significant influence on the absolute value of the dependent variable, thus we add treatment as an additive variable
-4. gam_4 assumes the Treatment has a significant influence on the absolute value and timing of the dependent variable, thus we add treatment as an additive variable and let day vary by treatment
+1. gamm_1 assumes Treatment is not significant and therefore we don't need to include it in the model.
+2. gamm_2 assumes the Treatment has a significant influence on the timing of the dependent variable, thus we let Day vary by Treatment.
+3. gamm_3 assumes the Treatment has a significant influence on the absolute value of the dependent variable, thus we add treatment as an additive variable.
+4. gamm_4 assumes the Treatment has a significant influence on the absolute value and timing of the dependent variable, thus we add treatment as an additive variable and let day vary by treatment.
 
 ```{r, eval=TRUE, echo = FLASE}
-gam_1 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs"), family = gaussian (), method = "REML", data = data)#GAMM model 1
-plot(gam_1, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
-plot_smooth(gam_1, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
+gamm_1 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs"), family = gaussian (), method = "REML", data = data)#GAMM model 1
+plot(gamm_1, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
+plot_smooth(gamm_1, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
 with(data, points(Day, Y, col = "grey50", pch = 16))#overlaying raw data on GAMM model output
 # you will notice an error here saying that the two smooth terms are essentially repeating the same information or are highly correlated. This is okay as we know this is likely the case
 
 
-gam_2 <- gam((Y) ~ s(Day, by = Treatment, k =12) + s(Day,Microcosm, bs = "fs"),family = gaussian (), method = "REML", data = data)#GAMM model 2
-plot(gam_2, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
-plot_smooth(gam_2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
+gamm_2 <- gam((Y) ~ s(Day, by = Treatment, k =12) + s(Day,Microcosm, bs = "fs"),family = gaussian (), method = "REML", data = data)#GAMM model 2
+plot(gamm_2, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
+plot_smooth(gamm_2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
 with(data, points(Day, Y, col = "grey50", pch = 16))#overlaying raw data on GAMM model output
 
 
-gam_3 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs") + Treatment, family = gaussian (), method = "REML", data = data)#GAMM model 3
-plot(gam_3, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
-plot_smooth(gam_3, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
+gamm_3 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs") + Treatment, family = gaussian (), method = "REML", data = data)#GAMM model 3
+plot(gamm_3, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
+plot_smooth(gamm_3, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
 with(data, points(Day, Y, col = "grey50", pch = 16))#overlaying raw data on GAMM model output
 
 
-gam_4 <- gam((Y) ~ s(Day,by =Treatment, k =12) + s(Day,Microcosm, bs = "fs") + Treatment, family = gaussian (), method = "REML", data = data)#GAMM model 4
-plot(gam_4, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
-plot_smooth(gam_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
+gamm_4 <- gam((Y) ~ s(Day,by =Treatment, k =12) + s(Day,Microcosm, bs = "fs") + Treatment, family = gaussian (), method = "REML", data = data)#GAMM model 4
+plot(gamm_4, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
+plot_smooth(gamm_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
 with(data, points(Day, Y, col = "grey50", pch = 16))#overlaying raw data on GAMM model output
 ```
 Building on the [Introduction]( https://github.com/OAEPIIP/OAEPIIP-Statistics-example/blob/main/OAEPIIP%20statistical%20analysis%20example/Introduction.md) you will notice the addition of "k" and "s(Day,Microcosm, bs = "fs"" in all models. "K" is the number of basis functions or "knots" (see [S. N. Wood (2006)]( https://www.taylorfrancis.com/books/mono/10.1201/9781315370279/generalized-additive-models-simon-wood) for more details). For our OAEPIIP dataset this will be the number of days our y-variable (e.g. nutrients) is measured. The other section "s(Day,Microcosm, bs = "fs"" specifies our random effect which controls for temporal pseudoreplication (repeated measurements from the same microcosm). Here, we fit Microcosm so that each level of the random effect (or each microcosm) has its own smooth.
@@ -88,20 +88,20 @@ extract_model_info <- function(model) {
 }
 
 # Apply the function to each model and populate the data frame
-model_results[1, ] <- c("gam_1", extract_model_info(gam_1))
-model_results[2, ] <- c("gam_2", extract_model_info(gam_2))
-model_results[3, ] <- c("gam_3", extract_model_info(gam_3))
-model_results[4, ] <- c("gam_4", extract_model_info(gam_4))
+model_results[1, ] <- c("gamm_1", extract_model_info(gamm_1))
+model_results[2, ] <- c("gamm_2", extract_model_info(gamm_2))
+model_results[3, ] <- c("gamm_3", extract_model_info(gamm_3))
+model_results[4, ] <- c("gamm_4", extract_model_info(gamm_4))
 
 # Print the table
 print(model_results)
 ```
 
-You will notice that gam_2 has the lowest AIC value but has the same R squared value as gam_4. Furthermore the difference in AIC values is < 2 which is a general threshold for determining significant differences between models. Thus you could safely pick either model 2 or 4 in this case, but first we should inspect the plots
+You will notice that gamm_2 has the lowest AIC value but has the same R squared value as gamm_4. Furthermore the difference in AIC values is < 2 which is a general threshold for determining significant differences between models. Thus you could safely pick either model 2 or 4 in this case, but first we should inspect the plots
 ```{r, eval=TRUE, echo = FLASE}
 par(mfrow = c(1, 1))
-plot_smooth(gam_2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
-plot_smooth(gam_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
+plot_smooth(gamm_2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
+plot_smooth(gamm_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")
 ggplot(data = avg_Y, aes(x = Day, y = Y, color = Treatment)) +
   geom_line() +
   geom_point() +
