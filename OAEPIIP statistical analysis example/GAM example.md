@@ -28,7 +28,7 @@ data$Treatment = as.factor(data$Treatment)
 str(data)
 ```
 
-For the OAEPIIP there are four potential scenarios we would like to assess with our significance testing
+For OAEPIIP there are four potential scenarios we would like to assess with our significance testing
 1. The treatment has no significant effect on the dependent variable
 2. The Treatment significantly effects the time at which changes in the dependent variable occur
 3. The treatment has an effect on the absolute values of the dependent variable
