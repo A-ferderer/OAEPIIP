@@ -130,19 +130,11 @@ You will also notice some text in the console output. The main thing to check he
 
 
 
-We must also check for concurvity. This checks to see if one of our smooth terms is the same as another smooth term. This is similar to collinearity in linear models. Note, we will need to specify "full=FALSE" to inspect matrices of pairwise concurvities. These show the degree to which each variable is predetermined by each other variable, rather than all other variables.
-
-```{r, eval=TRUE, echo = FLASE}
-concurvity(gamm_4, full = FALSE)
-```
-
-This produces a large table in the console. When looking at this table you should look at the "worst" table and ensure that comaprisons between different treatments i.e. control vs equilibrated are less than 1 while comparisons between the same treatment will give a value of or close to 1. It is safe to ignore the column "Microcosm" here as the specification of Microcosm as a random effect prevents any meaningful interpretation here.
-
-Finally we can have a look at the model summary now
+Finally we can have a look at the model summary
 ```{r, eval=TRUE, echo = FLASE}
 summary(gamm_4)
 ```
 
-There is a lot to look at here but essentially the parametric coefficients explain our linear terms, in our case the additive term Treatment. But the Approximate significance of smooth terms is what we are interested in. "edf" is the effective degrees of freedom with 1 = a straight line and the higher the number the more wiggly the smooth function is. "ref.df" and "f" are test statistics used in anova but these are only approximate. Finally our p value is showing statistical significance of each term, however this is approximate only and it is recomended to a) visually check this and b) compare several models via AIC values to establish the significance of variables (which we do above).
+There is a lot to look at here but the first section, the “parametric coefficients” explain our linear term or additive variable “Treatment”. The “Approximate significance of smooth terms” is what we are most interested in. "edf" is the effective degrees of freedom with 1 being equivalent to a straight line and the higher the number the more wiggly the smooth function is. "ref.df" and "f" are test statistics used in anova’s but these are only approximate. Finally, our “p-value” is showing statistical significance of each term, however this is approximate only and it is recommended to a) visually check this and b) compare several models via AIC values to establish the significance of variables (which we do above).
 
 
