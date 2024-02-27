@@ -28,7 +28,7 @@ data$Treatment = as.factor(data$Treatment)
 str(data)
 ```
 
-For OAEPIIP there are four potential scenarios we would like to assess with our significance testing
+For OAEPIIP there are four potential scenarios we would like to assess with our significance testing as illustrated in Figure 1.
 1. The treatment has no significant effect on the dependent variable
 2. The Treatment significantly effects the time at which changes in the dependent variable occur
 3. The treatment has an effect on the absolute values of the dependent variable
@@ -36,7 +36,7 @@ For OAEPIIP there are four potential scenarios we would like to assess with our 
 
 ![OAEPIIP_example](https://github.com/OAEPIIP/OAEPIIP-Statistics-example/assets/113956826/2b85b854-e4f1-4339-a1a0-fa69fe1fd635)
 
-adapted from [Ferderer et al., (2022)](https://doi.org/10.5194/bg-19-5375-2022)
+Figure 1 adapted from [Ferderer et al., (2022)](https://doi.org/10.5194/bg-19-5375-2022)
 
 In order to assess these we need to vary how the independent variable is included into our GAMM.
 
