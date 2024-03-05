@@ -1,6 +1,6 @@
 # OAEPIIP
 
-This workshop serves as a guide to use R for the statistical analyses of research conducted under the OAEPIIP project. This open-access workshop was created by authors of the OAEPIIP project for use of those involved in the OAEPIIP project.
+This repository serves as a guide to use R for the statistical analyses of research conducted under the OAEPIIP project. This open-access workshop was created by authors of the OAEPIIP project for use of those involved in the OAEPIIP project.
 
 The content of this workshop has been reviewed by the authors of the OAEPIIP. If you would like to suggest any modifications please contact aaron.ferderer@utas.edu.au
 
