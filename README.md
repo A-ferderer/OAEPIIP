@@ -11,3 +11,6 @@ This work is licensed under a [Creative Commons Attribution-NonCommercial-ShareA
 
 # Contributions
 Lennart Bach and Aaron Ferderer
+
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10783751.svg)](https://doi.org/10.5281/zenodo.10783751)
