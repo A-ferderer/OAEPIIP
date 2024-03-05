@@ -1,21 +1,13 @@
 # OAEPIIP
 
-This repository serves as a guide to use R for the statistical analyses of research conducted under the OAEPIIP project. This open-access workshop was created by authors of the OAEPIIP project for use of those involved in the OAEPIIP project.
+This repository contains information to support participants in the Ocean Alkalinity Enhancement Pelagic Impact Intercomparison Project (OAEPIIP). Within this repository there are two guides 1) an R script for the calculation of the addition of NaHCO3 and NaOH solution to establish the “equilibrated treatment, and 2) a workflow for the statistical analysis of individual OAEPIIP datasets using Generalized Additive Mixed Models (GAMMs). This open-access workshop was created by authors of the OAEPIIP project for use of those involved in the OAEPIIP project.
 
-The content of this workshop has been reviewed by the authors of the OAEPIIP. If you would like to suggest any modifications please contact aaron.ferderer@utas.edu.au
-
-# Workshop 1: analysis of OAEPIIP time series data
-
-The goal of this workshop is to provide a detailed description of one method (Generalised Additive Models, GAMs) for the appropriate analysis of data collected in as part of the OAEPIIP project. The workshop will begin by highlighting key issues with linear based methods for the statistical analysis of phyoplankton time series data. Following this the workshop will go into detail using an example dataset simialr to that expected by participants of the project.
-
-#workshop materials 
-...
+The content of this workshop has been reviewed by the authors of the OAEPIIP. If you would like to suggest any modifications please contact aaron.ferderer@utas.edu.au or lennart.bach@utas.edu.au
 
 # License
 This work is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/).
 ...
 
 
-
 # Contributions
-Aaron ferderer
+Lennart Bach and Aaron Ferderer
