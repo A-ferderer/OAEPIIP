@@ -1,0 +1,45 @@
+
+#The R package Seacarb (Gattuso et al., 2021) is needed for the calculation
+
+library(seacarb)
+
+#define your input parameters. Please note that these values probably need to be estimated because you 
+#will not have the exact data by the time you do this calculation. So, you need to assume a salinity and
+#a alkalinity that is characteristic for the area where you sourced the seawater from. I would be great if
+#you had some previous measurements on this available. But don't worry too much a slight offset from what 
+#you expect won't matter too much.
+
+Salinity = 35 #Expected (or measured) salinity in your enclosed microcosm seawater
+Temperature = 25 #Target temperature in your enclosed seawater. IMPORTANT: this is NOT the temperature of the temperature-controlled room but what you expect to be in the microcosms accounting for the convective heating system!
+Alkalinity  = 2350e-6 #Expected (or measured) alkalinity in your enclosed microcosm seawater (It may have to be estimated because you may not have a measurement before doing the alkalinity manipulations.)
+Alkalinity_enhancement = 500e-6 #The amount of alkalinity to be added. OAEPIIP does 500 micromol/kg, (do not change this number!)
+pCO2 = 420 #The pCO2 in seawater assuming equilibration with the atmosphere. This number is based on current atmospheric CO2 based on observatories such as Maona Loa.
+
+seawater_weight = 54 #The weight of enclosed seawater. You need to determine this for each microcosm individually as described in the OAEPIIP paper.
+
+Molarity_NaHCO3 = 1 #The molarity of the sodium bicarbonate stock solution used for alkalinity enhancement in the equilibrated treatement. It is recommended to use 1 molar solutions as it makes calculations most intuitive.
+Molarity_NaOH = 1 #The molarity of the sodium hydroxide stock solution used for alkalinity enhancement in the equilibrated treatement. It is recommended to use 1 molar solutions as it makes calculations most intuitive.
+
+#calculate initial and perturbed carbonate system
+
+initial_CSYS = carb(flag = 24, var1 = pCO2, var2 = Alkalinity, S=Salinity, T=Temperature)
+
+equilibrated_CSYS = carb(flag = 24, var1 = pCO2, var2 = Alkalinity+Alkalinity_enhancement, S=Salinity, T=Temperature)
+
+#calculation of sodium bicarbonate and sodium hydroxide to be added
+
+NaHCO3_addition = ((equilibrated_CSYS$DIC-initial_CSYS$DIC)*1e6)
+
+NaHCO3_addition_per_kg = NaHCO3_addition/Molarity_NaHCO3 #in microL per kg
+
+NaOH_addition_per_kg = (Alkalinity_enhancement*1e6-NaHCO3_addition)/Molarity_NaOH #in microL per kg
+
+NaHCO3_addition_per_microcosm = NaHCO3_addition_per_kg*seawater_weight #in microL per microcosm
+
+NaOH_addition_per_microcosm = NaOH_addition_per_kg*seawater_weight #in microL per microcosm
+
+#output
+
+NaHCO3_addition_per_microcosm #in microL per microcosm
+
+NaOH_addition_per_microcosm #in microL per microcosm
