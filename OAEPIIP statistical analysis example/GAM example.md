@@ -46,31 +46,31 @@ In order to assess these we need to vary how the independent variable is include
 4. gamm_4 assumes the Treatment has a significant influence on the absolute value and timing of the dependent variable, thus we add treatment as an additive variable and let day vary by treatment.
 
 ```{r, eval=TRUE, echo = FLASE}
-gamm_1 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs"), family = gaussian (), method = "REML", data = data)#GAMM model 1
+gamm_1 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs", k = 9), family = gaussian (), method = "REML", data = data)#GAMM model 1
 plot(gamm_1, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
 plot_smooth(gamm_1, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
 with(data, points(Day, Y, col = "grey50", pch = 16))#overlaying raw data on GAMM model output
 # you will notice an error here saying that the two smooth terms are essentially repeating the same information or are highly correlated. This is okay as we know this is likely the case
 
 
-gamm_2 <- gam((Y) ~ s(Day, by = Treatment, k =12) + s(Day,Microcosm, bs = "fs"),family = gaussian (), method = "REML", data = data)#GAMM model 2
+gamm_2 <- gam((Y) ~ s(Day, by = Treatment, k =12) + s(Day,Microcosm, bs = "fs", k = 9),family = gaussian (), method = "REML", data = data)#GAMM model 2
 plot(gamm_2, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
 plot_smooth(gamm_2, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
 with(data, points(Day, Y, col = "grey50", pch = 16))#overlaying raw data on GAMM model output
 
 
-gamm_3 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs") + Treatment, family = gaussian (), method = "REML", data = data)#GAMM model 3
+gamm_3 <- gam((Y) ~ s(Day, k =12) + s(Day,Microcosm, bs = "fs",  k = 9) + Treatment, family = gaussian (), method = "REML", data = data)#GAMM model 3
 plot(gamm_3, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
 plot_smooth(gamm_3, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
 with(data, points(Day, Y, col = "grey50", pch = 16))#overlaying raw data on GAMM model output
 
 
-gamm_4 <- gam((Y) ~ s(Day,by =Treatment, k =12) + s(Day,Microcosm, bs = "fs") + Treatment, family = gaussian (), method = "REML", data = data)#GAMM model 4
+gamm_4 <- gam((Y) ~ s(Day,by =Treatment, k =12) + s(Day,Microcosm, bs = "fs", k = 9) + Treatment, family = gaussian (), method = "REML", data = data)#GAMM model 4
 plot(gamm_4, residuals = TRUE, pch = 1, cex = 1, shade = TRUE, shade.col = "lightblue", pages = 1, all.terms = TRUE, seWithMean = TRUE)#plot type 1
 plot_smooth(gamm_4, view="Day", plot_all="Treatment", rm.ranef=F, xlab = "Day", ylab = "Y")#plot type 2
 with(data, points(Day, Y, col = "grey50", pch = 16))#overlaying raw data on GAMM model output
 ```
-Building on the [Introduction]( https://github.com/OAEPIIP/OAEPIIP-Statistics-example/blob/main/OAEPIIP%20statistical%20analysis%20example/Introduction.md) you will notice the addition of "k" and "s(Day,Microcosm, bs = "fs"" in all models. "K" is the number of basis functions or "knots" (see [S. N. Wood (2006)]( https://www.taylorfrancis.com/books/mono/10.1201/9781315370279/generalized-additive-models-simon-wood) for more details). For our OAEPIIP dataset this will be the number of days our y-variable (e.g. nutrients) is measured. The other section "s(Day,Microcosm, bs = "fs"" specifies our random effect which controls for temporal pseudoreplication (repeated measurements from the same microcosm). Here, we fit Microcosm so that each level of the random effect (or each microcosm) has its own smooth.
+Building on the [Introduction]( https://github.com/OAEPIIP/OAEPIIP-Statistics-example/blob/main/OAEPIIP%20statistical%20analysis%20example/Introduction.md) you will notice the addition of "k" and "s(Day,Microcosm, bs = "fs",  k = 9 " in all models. "k" is the number of basis functions or "knots" (see [S. N. Wood (2006)]( https://www.taylorfrancis.com/books/mono/10.1201/9781315370279/generalized-additive-models-simon-wood) for more details). For our OAEPIIP dataset this will generally be the number of days our y-variable (e.g. nutrients) is measured in the first instance, however you may need to reduce this number if you have insufficient data points. The second instance of "k" will always be "k = 9" as we have 9 microcosms. The other section "s(Day,Microcosm, bs = "fs"" specifies our random effect which controls for temporal pseudoreplication (repeated measurements from the same microcosm). Here, we fit Microcosm so that each level of the random effect (or each microcosm) has its own smooth.
 
 Now we can compare our models using AIC and R square values. This will help us decide which of our four models explains our data the best.
 ```{r, eval=TRUE, echo = FLASE}
